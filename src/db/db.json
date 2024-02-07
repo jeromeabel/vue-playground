@@ -1,0 +1,42 @@
+{
+  "courses": [
+    {
+      "id": 1,
+      "name": "Cours de Kung Fu",
+      "description": "Un cours intensif de Kung Fu pour débutants.",
+      "price": 50
+    },
+    {
+      "id": 2,
+      "name": "Cours de Tai Chi",
+      "description": "Un cours de Tai Chi relaxant pour tous les niveaux.",
+      "price": 40
+    },
+    {
+      "id": 3,
+      "name": "Cours de Qi Gong",
+      "description": "Un cours de Qi Gong pour renforcer le corps et l'esprit.",
+      "price": 45
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Kimono de Kung Fu",
+      "description": "Kimono de Kung Fu de haute qualité.",
+      "price": 100
+    },
+    {
+      "id": 2,
+      "name": "Sabre Chinois",
+      "description": "Sabre traditionnel chinois pour la pratique du Kung Fu.",
+      "price": 80
+    },
+    {
+      "id": 3,
+      "name": "Gant de Frappe",
+      "description": "Gant de frappe pour l'entraînement au combat.",
+      "price": 30
+    }
+  ]
+}

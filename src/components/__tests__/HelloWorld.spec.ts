@@ -1,11 +1,20 @@
-// import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
 
-// import { mount } from '@vue/test-utils'
-// import HelloWorld from '../HelloWorld.vue'
+// The component to test
+const MessageComponent = {
+  template: '<p>{{ msg }}</p>',
+  props: ['msg']
+}
 
-// describe('HelloWorld', () => {
-//   it('renders properly', () => {
-//     const wrapper = mount(HelloWorld, { props: { msg: 'Hello Vitest' } })
-//     expect(wrapper.text()).toContain('Hello Vitest')
-//   })
-// })
+describe('Hello World: testing the test config with a dummy Vue component', () => {
+  it('Should display a message', () => {
+    const wrapper = mount(MessageComponent, {
+      props: {
+        msg: 'Hello world'
+      }
+    })
+
+    // Assert the rendered text of the component
+    expect(wrapper.text()).toContain('Hello world')
+  })
+})

@@ -7,7 +7,7 @@ export const useOpticalStore = defineStore('OpticalStore', {
   }),
   getters: {
     shortProductsList: (state) => {
-      return state.products.splice(0, 5) // équivalent de la function computed
+      return state.products.splice(0, 9) // équivalent de la function computed
     }
   },
   actions: {

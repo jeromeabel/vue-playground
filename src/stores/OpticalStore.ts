@@ -8,6 +8,22 @@ export const useOpticalStore = defineStore('OpticalStore', {
   getters: {
     shortProductsList: (state) => {
       return state.products.splice(0, 9) // équivalent de la function computed
+    },
+    numberOfProducts: (state) => {
+      return state.products.length
+    },
+    getProduct: (): Product => {
+      return {
+        name: 'Lunettes de soleil aviateur',
+        brand: 'Ray-Ban',
+        material: 'Acier inoxydable',
+        color: 'Doré',
+        price: 150,
+        id: '0dvc'
+      }
+    },
+    getProductById: (state) => {
+      return (productId: string) => state.products.find((product) => product.id === productId)
     }
   },
   actions: {

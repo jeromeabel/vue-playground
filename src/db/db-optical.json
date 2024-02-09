@@ -1,0 +1,402 @@
+{
+  "optical_stores": [
+    {
+      "name": "Optique de France",
+      "address": "1 Rue de la République, Paris",
+      "telephone": "01 23 45 67 89",
+      "schedules": "Lun - Ven: 9h - 18h, Sam: 9h - 12h"
+    },
+    {
+      "name": "Lunettes pour Tous",
+      "address": "15 Avenue des Champs-Élysées, Paris",
+      "telephone": "01 98 76 54 32",
+      "schedules": "Lun - Ven: 10h - 19h, Sam: 10h - 14h"
+    },
+    {
+      "name": "Vision Claire",
+      "address": "5 Rue de la Liberté, Lyon",
+      "telephone": "04 56 78 90 12",
+      "schedules": "Lun - Ven: 9h - 18h, Sam: 9h - 12h"
+    },
+    {
+      "name": "Optique du Sud",
+      "address": "25 Boulevard Gambetta, Marseille",
+      "telephone": "06 12 34 56 78",
+      "schedules": "Lun - Ven: 10h - 19h, Sam: 10h - 14h"
+    },
+    {
+      "name": "Voir Plus Loin",
+      "address": "10 Rue Nationale, Lille",
+      "telephone": "03 45 67 89 01",
+      "schedules": "Lun - Ven: 9h - 18h, Sam: 9h - 12h"
+    },
+    {
+      "name": "Vue d'Or",
+      "address": "8 Rue de la Paix, Bordeaux",
+      "telephone": "05 67 89 01 23",
+      "schedules": "Lun - Ven: 10h - 19h, Sam: 10h - 14h"
+    },
+    {
+      "name": "Optique Pro",
+      "address": "3 Place du Commerce, Toulouse",
+      "telephone": "05 43 21 09 87",
+      "schedules": "Lun - Ven: 9h - 18h, Sam: 9h - 12h"
+    },
+    {
+      "name": "Les Yeux Malins",
+      "address": "12 Rue de la Mairie, Nice",
+      "telephone": "04 32 10 98 76",
+      "schedules": "Lun - Ven: 10h - 19h, Sam: 10h - 14h"
+    },
+    {
+      "name": "VisionNet",
+      "address": "7 Avenue Jean Jaurès, Strasbourg",
+      "telephone": "03 21 09 87 65",
+      "schedules": "Lun - Ven: 9h - 18h, Sam: 9h - 12h"
+    },
+    {
+      "name": "Regard Optique",
+      "address": "20 Rue de la Gare, Nantes",
+      "telephone": "02 54 67 89 01",
+      "schedules": "Lun - Ven: 10h - 19h, Sam: 10h - 14h"
+    }
+  ],
+  "eyewear_products": [
+    {
+      "name": "Lunettes de soleil aviateur",
+      "brand": "Ray-Ban",
+      "material": "Acier inoxydable",
+      "color": "Doré",
+      "price": 150
+    },
+    {
+      "name": "Lunettes de vue rectangulaires",
+      "brand": "Gucci",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 300
+    },
+    {
+      "name": "Lunettes de lecture rondes",
+      "brand": "Tom Ford",
+      "material": "Métal",
+      "color": "Argent",
+      "price": 100
+    },
+    {
+      "name": "Lunettes de sport polarisées",
+      "brand": "Nike",
+      "material": "Plastique",
+      "color": "Noir/Rouge",
+      "price": 120
+    },
+    {
+      "name": "Lunettes de vue rétro",
+      "brand": "Prada",
+      "material": "Acétate",
+      "color": "Havane",
+      "price": 280
+    },
+    {
+      "name": "Lunettes de soleil œil de chat",
+      "brand": "Dior",
+      "material": "Métal",
+      "color": "Or",
+      "price": 350
+    },
+    {
+      "name": "Lunettes de lecture papillon",
+      "brand": "Versace",
+      "material": "Plastique",
+      "color": "Violet",
+      "price": 90
+    },
+    {
+      "name": "Lunettes de vue carrées",
+      "brand": "Burberry",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 260
+    },
+    {
+      "name": "Lunettes de sport enveloppantes",
+      "brand": "Oakley",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 180
+    },
+    {
+      "name": "Lunettes de soleil rondes",
+      "brand": "Persol",
+      "material": "Acier inoxydable",
+      "color": "Gris",
+      "price": 220
+    },
+    {
+      "name": "Lunettes de lecture rectangulaires",
+      "brand": "Calvin Klein",
+      "material": "Métal",
+      "color": "Noir",
+      "price": 110
+    },
+    {
+      "name": "Lunettes de sport anti-buée",
+      "brand": "Adidas",
+      "material": "Plastique",
+      "color": "Bleu",
+      "price": 140
+    },
+    {
+      "name": "Lunettes de vue œil de chat",
+      "brand": "Gucci",
+      "material": "Acétate",
+      "color": "Havane",
+      "price": 320
+    },
+    {
+      "name": "Lunettes de soleil pilote",
+      "brand": "Ray-Ban",
+      "material": "Métal",
+      "color": "Argent",
+      "price": 180
+    },
+    {
+      "name": "Lunettes de lecture carrées",
+      "brand": "Tom Ford",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 120
+    },
+    {
+      "name": "Lunettes de vue rondes",
+      "brand": "Prada",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 270
+    },
+    {
+      "name": "Lunettes de sport photochromiques",
+      "brand": "Nike",
+      "material": "Plastique",
+      "color": "Noir/Vert",
+      "price": 160
+    },
+    {
+      "name": "Lunettes de soleil rectangulaires",
+      "brand": "Dior",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 330
+    },
+    {
+      "name": "Lunettes de lecture ovales",
+      "brand": "Versace",
+      "material": "Métal",
+      "color": "Or",
+      "price": 100
+    },
+    {
+      "name": "Lunettes de vue papillon",
+      "brand": "Burberry",
+      "material": "Acétate",
+      "color": "Marron",
+      "price": 280
+    },
+    {
+      "name": "Lunettes de sport incassables",
+      "brand": "Oakley",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 200
+    },
+    {
+      "name": "Lunettes de soleil cat-eye",
+      "brand": "Persol",
+      "material": "Acétate",
+      "color": "Havane",
+      "price": 240
+    },
+    {
+      "name": "Lunettes de lecture rondes",
+      "brand": "Calvin Klein",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 110
+    },
+    {
+      "name": "Lunettes de vue aviateur",
+      "brand": "Adidas",
+      "material": "Acier inoxydable",
+      "color": "Argent",
+      "price": 290
+    },
+    {
+      "name": "Lunettes de sport résistantes à l'eau",
+      "brand": "Gucci",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 220
+    },
+    {
+      "name": "Lunettes de soleil rétro",
+      "brand": "Ray-Ban",
+      "material": "Acétate",
+      "color": "Havane",
+      "price": 200
+    },
+    {
+      "name": "Lunettes de lecture rectangulaires",
+      "brand": "Tom Ford",
+      "material": "Métal",
+      "color": "Argent",
+      "price": 120
+    },
+    {
+      "name": "Lunettes de vue carrées",
+      "brand": "Prada",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 280
+    },
+    {
+      "name": "Lunettes de sport légères",
+      "brand": "Nike",
+      "material": "Plastique",
+      "color": "Noir/Orange",
+      "price": 170
+    },
+    {
+      "name": "Lunettes de soleil œil de chat",
+      "brand": "Dior",
+      "material": "Métal",
+      "color": "Or",
+      "price": 360
+    },
+    {
+      "name": "Lunettes de lecture papillon",
+      "brand": "Versace",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 100
+    },
+    {
+      "name": "Lunettes de vue rectangulaires",
+      "brand": "Burberry",
+      "material": "Acétate",
+      "color": "Marron",
+      "price": 270
+    },
+    {
+      "name": "Lunettes de sport anti-reflet",
+      "brand": "Oakley",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 190
+    },
+    {
+      "name": "Lunettes de soleil pilote",
+      "brand": "Persol",
+      "material": "Acier inoxydable",
+      "color": "Gris",
+      "price": 230
+    },
+    {
+      "name": "Lunettes de lecture carrées",
+      "brand": "Calvin Klein",
+      "material": "Métal",
+      "color": "Argent",
+      "price": 100
+    },
+    {
+      "name": "Lunettes de vue rondes",
+      "brand": "Adidas",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 290
+    },
+    {
+      "name": "Lunettes de sport photochromiques",
+      "brand": "Gucci",
+      "material": "Plastique",
+      "color": "Noir/Vert",
+      "price": 180
+    },
+    {
+      "name": "Lunettes de soleil rectangulaires",
+      "brand": "Ray-Ban",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 350
+    },
+    {
+      "name": "Lunettes de lecture ovales",
+      "brand": "Tom Ford",
+      "material": "Métal",
+      "color": "Argent",
+      "price": 120
+    },
+    {
+      "name": "Lunettes de vue papillon",
+      "brand": "Prada",
+      "material": "Acétate",
+      "color": "Noir",
+      "price": 260
+    },
+    {
+      "name": "Lunettes de sport incassables",
+      "brand": "Nike",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 210
+    },
+    {
+      "name": "Lunettes de soleil cat-eye",
+      "brand": "Persol",
+      "material": "Acétate",
+      "color": "Havane",
+      "price": 250
+    },
+    {
+      "name": "Lunettes de lecture rectangulaires",
+      "brand": "Calvin Klein",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 120
+    },
+    {
+      "name": "Lunettes de vue aviateur",
+      "brand": "Adidas",
+      "material": "Acier inoxydable",
+      "color": "Argent",
+      "price": 310
+    },
+    {
+      "name": "Lunettes de sport résistantes à l'eau",
+      "brand": "Gucci",
+      "material": "Plastique",
+      "color": "Noir",
+      "price": 230
+    },
+    {
+      "name": "Lunettes de soleil rétro",
+      "brand": "Ray-Ban",
+      "material": "Acétate",
+      "color": "Havane",
+      "price": 220
+    },
+    {
+      "name": "Lunettes de lecture ovales",
+      "brand": "Versace",
+      "material": "Métal",
+      "color": "Or",
+      "price": 110
+    },
+    {
+      "name": "Lunettes de vue papillon",
+      "brand": "Burberry",
+      "material": "Acétate",
+      "color": "Marron",
+      "price": 290
+    }
+  ]
+}

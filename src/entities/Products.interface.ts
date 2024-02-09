@@ -1,4 +1,5 @@
-export interface EyewearProduct {
+export interface Product {
+  id?: number
   name: string
   brand: string
   material: string

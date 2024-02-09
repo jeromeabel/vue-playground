@@ -1,5 +1,5 @@
 {
-  "optical_stores": [
+  "shops": [
     {
       "name": "Optique de France",
       "address": "1 Rue de la République, Paris",
@@ -61,7 +61,7 @@
       "schedules": "Lun - Ven: 10h - 19h, Sam: 10h - 14h"
     }
   ],
-  "eyewear_products": [
+  "products": [
     {
       "name": "Lunettes de soleil aviateur",
       "brand": "Ray-Ban",

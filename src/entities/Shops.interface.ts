@@ -1,4 +1,4 @@
-export interface OpticalShop {
+export interface Shop {
   name: string
   address: string
   telephone: string

@@ -9,7 +9,10 @@ const cartStore = useCartStore()
 
 const route = useRoute()
 const opticalStore = useOpticalStore()
+
 const { getProductById } = storeToRefs(opticalStore)
+
+// logique dans le store.
 opticalStore.fetchProducts()
 
 // Vérifiez si route.params.id est une chaîne de caractères avant de l'utiliser
@@ -17,6 +20,7 @@ const productId = Array.isArray(route.params.id) ? route.params.id[0] : route.pa
 
 // const actualGetProductById = getProductById.value // ??
 const product = getProductById.value(productId) as Product //valeur réelle de la référence calculée
+// const product = opticalStore.getProductById(productId) as Product
 </script>
 
 <template>

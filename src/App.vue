@@ -2,6 +2,11 @@
 import { RouterView } from 'vue-router'
 import BaseHeader from '@/components/BaseHeader.vue'
 import CartSidebar from '@/components/CartSidebar.vue'
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  console.log('mounted')
+})
 </script>
 
 <template>

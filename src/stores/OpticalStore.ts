@@ -7,7 +7,7 @@ export const useOpticalStore = defineStore('OpticalStore', {
   }),
   getters: {
     shortProductsList: (state) => {
-      return state.products.splice(0, 9) as Product[] // équivalent de la function computed
+      return state.products.slice(0, 9) as Product[] // équivalent de la function computed
     },
     getProductById: (state) => {
       return (productId: string) => state.products.find((product) => product.id === productId)

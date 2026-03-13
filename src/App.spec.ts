@@ -13,6 +13,18 @@ describe("App", () => {
                     path: "/",
                     component: HomePage,
                 },
+                {
+                    path: "/species",
+                    component: HomePage,
+                },
+                {
+                    path: "/benchmark",
+                    component: HomePage,
+                },
+                {
+                    path: "/about",
+                    component: HomePage,
+                },
             ],
         });
 

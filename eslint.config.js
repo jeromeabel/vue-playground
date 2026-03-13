@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import globals from "globals";
 import pluginVue from "eslint-plugin-vue";
+import unicorn from "eslint-plugin-unicorn";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
@@ -20,6 +21,9 @@ export default tseslint.config(
     }),
     {
         files: ["**/*.{js,mjs,cjs,ts,tsx,vue}"],
+        plugins: {
+            unicorn,
+        },
         languageOptions: {
             ecmaVersion: "latest",
             sourceType: "module",
@@ -30,6 +34,16 @@ export default tseslint.config(
         },
         rules: {
             "vue/multi-word-component-names": "off",
+            "unicorn/filename-case": [
+                "error",
+                {
+                    cases: {
+                        kebabCase: true,
+                    },
+                    ignore: ["^\\[.+\\]$"],
+                    multipleFileExtensions: true,
+                },
+            ],
         },
     },
     {

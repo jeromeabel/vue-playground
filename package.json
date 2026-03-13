@@ -29,6 +29,7 @@
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.9.0",
     "eslint": "^10.0.3",
+    "eslint-plugin-unicorn": "^63.0.0",
     "eslint-plugin-vue": "^10.8.0",
     "globals": "^17.4.0",
     "happy-dom": "^20.8.4",

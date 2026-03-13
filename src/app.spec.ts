@@ -1,8 +1,8 @@
 import { mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 
-import App from "@/App.vue";
-import HomePage from "@/pages/HomePage.vue";
+import App from "@/app.vue";
+import HomePage from "@/pages/home-page.vue";
 
 describe("App", () => {
     it("renders the routed home page scaffold", async () => {
@@ -34,6 +34,9 @@ describe("App", () => {
         const wrapper = mount(App, {
             global: {
                 plugins: [router],
+                stubs: {
+                    VueQueryDevtools: true,
+                },
             },
         });
 

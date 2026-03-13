@@ -35,3 +35,5 @@ Botanical data explorer built with Vue 3, showcasing performance patterns for bl
 - No Prettier: ESLint Stylistic handles formatting
 - File-based routing: add pages to `src/pages/`, routes auto-generate
 - Tests go in `src/**/__tests__/` or as `*.test.ts`
+- LLM file naming rule: all new files must use kebab-case (examples: `app-header.vue`, `use-species-list.ts`, `home-page.vue`)
+- Exception: Vue Router dynamic route files may use bracket params (example: `[id].vue`)

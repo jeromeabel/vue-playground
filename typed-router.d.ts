@@ -44,9 +44,9 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/HomePage': RouteRecordInfo<
-      '/HomePage',
-      '/HomePage',
+    '/home-page': RouteRecordInfo<
+      '/home-page',
+      '/home-page',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -96,9 +96,9 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/pages/HomePage.vue': {
+    'src/pages/home-page.vue': {
       routes:
-        | '/HomePage'
+        | '/home-page'
       views:
         | never
     }

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-import SpeciesCard from "@/components/SpeciesCard.vue";
-import { useSpeciesList } from "@/composables/useSpeciesList";
+import SpeciesCard from "@/components/species-card.vue";
+import { useSpeciesList } from "@/composables/use-species-list";
 
 const page = ref(0);
 const { data, isPending, isError, error, refetch, totalPages, prefetchNext } = useSpeciesList(page);

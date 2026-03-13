@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 
-import App from "@/App.vue";
+import App from "@/app.vue";
 
 describe("App", () => {
     it("mounts without errors", () => {

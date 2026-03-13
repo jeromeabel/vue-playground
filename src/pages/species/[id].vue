@@ -2,9 +2,9 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
-import { useSpeciesDetail } from "@/composables/useSpeciesDetail";
-import { useSpeciesMedia } from "@/composables/useSpeciesMedia";
-import { useVernacularNames } from "@/composables/useVernacularNames";
+import { useSpeciesDetail } from "@/composables/use-species-detail";
+import { useSpeciesMedia } from "@/composables/use-species-media";
+import { useVernacularNames } from "@/composables/use-vernacular-names";
 
 const route = useRoute();
 const id = computed(() => Number(route.params.id));

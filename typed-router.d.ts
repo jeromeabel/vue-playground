@@ -44,6 +44,27 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/benchmark/basic-table': RouteRecordInfo<
+      '/benchmark/basic-table',
+      '/benchmark/basic-table',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/benchmark/primevue-table': RouteRecordInfo<
+      '/benchmark/primevue-table',
+      '/benchmark/primevue-table',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/benchmark/tanstack-table': RouteRecordInfo<
+      '/benchmark/tanstack-table',
+      '/benchmark/tanstack-table',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/home-page': RouteRecordInfo<
       '/home-page',
       '/home-page',
@@ -93,6 +114,24 @@ declare module 'vue-router/auto-routes' {
     'src/pages/benchmark/index.vue': {
       routes:
         | '/benchmark/'
+      views:
+        | never
+    }
+    'src/pages/benchmark/basic-table.vue': {
+      routes:
+        | '/benchmark/basic-table'
+      views:
+        | never
+    }
+    'src/pages/benchmark/primevue-table.vue': {
+      routes:
+        | '/benchmark/primevue-table'
+      views:
+        | never
+    }
+    'src/pages/benchmark/tanstack-table.vue': {
+      routes:
+        | '/benchmark/tanstack-table'
       views:
         | never
     }

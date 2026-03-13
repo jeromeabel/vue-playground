@@ -3,31 +3,38 @@ import { RouterLink } from "vue-router";
 </script>
 
 <template>
-  <header class="sticky top-0 z-10 border-b border-white/60 bg-white/75 backdrop-blur-xl">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4 sm:px-8 lg:px-10">
+  <header class="border-b border-surface-dark bg-white px-6 py-3">
+    <nav class="mx-auto flex max-w-6xl items-center gap-6">
       <RouterLink
-        class="flex items-center gap-3"
         to="/"
+        class="text-lg font-semibold text-primary"
       >
-        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-moss-600 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-moss-600/20">
-          VP
-        </div>
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.28em] text-moss-600">
-            Vue Playground
-          </p>
-          <p class="text-sm text-slate-600">
-            Technical demos shaped for blog posts.
-          </p>
-        </div>
+        Vue Playground
       </RouterLink>
 
-      <div class="flex items-center gap-3 text-sm text-slate-600">
-        <span class="rounded-full border border-moss-600/15 bg-moss-600/8 px-3 py-1 font-medium text-moss-600">
-          Minimal setup
-        </span>
-        <span class="hidden sm:inline">Home route live, feature routes next.</span>
+      <div class="flex gap-4 text-sm">
+        <RouterLink
+          to="/species"
+          active-class="text-primary font-medium"
+          class="text-text-muted hover:text-text"
+        >
+          Species
+        </RouterLink>
+        <RouterLink
+          to="/benchmark"
+          active-class="text-primary font-medium"
+          class="text-text-muted hover:text-text"
+        >
+          Benchmark
+        </RouterLink>
+        <RouterLink
+          to="/about"
+          active-class="text-primary font-medium"
+          class="text-text-muted hover:text-text"
+        >
+          About
+        </RouterLink>
       </div>
-    </div>
+    </nav>
   </header>
 </template>

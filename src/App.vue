@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterView } from "vue-router";
+import { VueQueryDevtools } from "@tanstack/vue-query-devtools";
 
 import AppHeader from "@/components/AppHeader.vue";
 </script>
@@ -7,8 +7,9 @@ import AppHeader from "@/components/AppHeader.vue";
 <template>
   <div class="min-h-screen">
     <AppHeader />
-    <main class="mx-auto w-full max-w-6xl px-6 pb-16 pt-8 sm:px-8 lg:px-10">
+    <main class="mx-auto max-w-6xl px-6 py-8">
       <RouterView />
     </main>
   </div>
+  <VueQueryDevtools />
 </template>

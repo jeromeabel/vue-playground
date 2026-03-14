@@ -101,8 +101,16 @@ src/
 | `src/pages/benchmark/primevue-table.vue` | `src/features/benchmark/pages/primevue-table.vue` |
 | `src/pages/benchmark/tanstack-table.vue` | `src/features/benchmark/pages/tanstack-table.vue` |
 | `src/components/app-header.vue` | `src/shared/components/app-header.vue` |
+| `src/composables/__tests__/use-dom-metrics.test.ts` | `src/features/benchmark/composables/__tests__/use-dom-metrics.test.ts` |
 
-**Deleted after moves (empty):** `src/api/`, `src/composables/`, `src/components/`
+**Deleted after moves:**
+- `src/api/` (empty)
+- `src/composables/` (empty)
+- `src/components/` (empty)
+- `src/pages/species/` (empty, routes now served from feature folder)
+- `src/pages/benchmark/` (empty, routes now served from feature folder)
+- `src/router/index.ts` — legacy manual router, superseded by `src/router.ts` with file-based routing
+- `src/pages/home-page.vue` — dead file, superseded by `src/pages/index.vue`
 
 ## Vite Configuration
 
@@ -166,14 +174,32 @@ shared/  ← species  ← benchmark
 
 **Enforcement:** Folder structure makes violations visible. `eslint-plugin-boundaries` can be added later for automated enforcement.
 
+## Export Strategy
+
+No barrel files (`index.ts`). Import from specific files directly. This keeps the dependency graph explicit and avoids re-export indirection.
+
+```ts
+// Do this:
+import type { GbifSpeciesSummary } from "@/features/species/types"
+
+// Not this:
+import type { GbifSpeciesSummary } from "@/features/species"
+```
+
 ## What Does NOT Change
 
 - `src/router.ts` — consumes auto-generated routes, no changes needed
 - `src/app.vue` — only the `app-header` import path changes
 - `src/main.ts` — no changes
+- `src/style.css` — global styles, stays at root
 - `src/__tests__/app.test.ts`, `src/app.spec.ts` — stay at root, test the app shell
 - `public/data/` — static datasets stay in public
 - `scripts/` — build scripts stay at root
+
+## Known Compromises
+
+- **`use-debounce` in benchmark:** This is a generic utility (debounces any `Ref<T>`) placed inside the benchmark feature because it's its only consumer today. If the species feature later needs debouncing, move it to `src/shared/composables/use-debounce.ts`.
+- **`BenchmarkedSpecies` type duplication:** All three benchmark table pages define `type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number }` inline. Could be extracted to `src/features/benchmark/types.ts` during implementation.
 
 ## Future Considerations
 

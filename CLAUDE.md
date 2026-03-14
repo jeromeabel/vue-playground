@@ -29,6 +29,12 @@ Botanical data explorer built with Vue 3, showcasing performance patterns for bl
 - `scripts/` - build scripts
 - `public/data/species-3000.json` - pre-fetched 3000-species dataset for benchmarks
 
+## Local Docs (`.docs/` — git-ignored)
+
+- `.docs/features/NNN-name/` - feature work with `design.md`, `plan.md`, etc.
+- `.docs/blog/` - blog post drafts
+- `.docs/resources/` - imported production code & docs from company work (reference material for blog posts)
+
 ## Conventions
 
 - No Pinia: use TanStack Query for server state and `ref`/`computed` for local state

@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { onBeforeMount, onMounted, ref, useTemplateRef } from "vue";
+import { computed, onBeforeMount, onMounted, ref, useTemplateRef, watch } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 
 import type { GbifSpeciesSummary } from "@/api/gbif";
 import MetricsPanel from "@/components/metrics-panel.vue";
 import { useDomMetrics } from "@/composables/use-dom-metrics";
+import { useDebounce } from "@/composables/use-debounce";
 
 type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number };
 
 const species = ref<BenchmarkedSpecies[]>([]);
 const tableContainer = useTemplateRef("tableContainer");
+const searchInput = ref("");
+const query = useDebounce(searchInput, 300);
+const virtualScrollEnabled = ref(true);
+const expandedRows = ref<BenchmarkedSpecies[]>([]);
 
 const {
     mountTimeMs,
@@ -27,11 +32,12 @@ onBeforeMount(() => {
 });
 
 onMounted(async () => {
-    const res = await fetch("/data/species-3000.json");
+    const res = await fetch("/data/species-10000.json");
     const data = await res.json() as GbifSpeciesSummary[];
     species.value = data.map((item, index) => ({
         ...item,
         benchmarkOrder: index + 1,
+        vernacularNames: item.vernacularNames ?? [],
     }));
 
     requestAnimationFrame(() => {
@@ -41,6 +47,35 @@ onMounted(async () => {
         }
         startFpsCounter();
     });
+});
+
+const filteredSpecies = computed(() => {
+    if (!query.value) return species.value;
+    const q = query.value.toLowerCase();
+    return species.value.filter(s =>
+        s.canonicalName.toLowerCase().includes(q)
+        || s.family.toLowerCase().includes(q)
+        || s.genus.toLowerCase().includes(q)
+        || s.vernacularNames.some(v => v.vernacularName.toLowerCase().includes(q)),
+    );
+});
+
+function matchedVernaculars(s: BenchmarkedSpecies) {
+    if (!query.value) return [];
+    const q = query.value.toLowerCase();
+    return s.vernacularNames.filter(v => v.vernacularName.toLowerCase().includes(q));
+}
+
+// Auto-expand rows whose vernacular names match the search
+watch([filteredSpecies, query], () => {
+    if (!query.value) {
+        expandedRows.value = [];
+        return;
+    }
+    const q = query.value.toLowerCase();
+    expandedRows.value = filteredSpecies.value.filter(s =>
+        s.vernacularNames.some(v => v.vernacularName.toLowerCase().includes(q)),
+    );
 });
 </script>
 
@@ -63,17 +98,42 @@ onMounted(async () => {
       :fps="fps"
     />
 
+    <div class="mb-3 flex items-center gap-3">
+      <input
+        v-model="searchInput"
+        type="search"
+        placeholder="Search name, family, genus, common name…"
+        class="w-full max-w-md rounded border border-surface-dark bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+      >
+      <span class="text-sm text-text-muted">
+        {{ filteredSpecies.length.toLocaleString() }} / {{ species.length.toLocaleString() }}
+      </span>
+      <label class="flex cursor-pointer items-center gap-1.5 text-sm">
+        <input
+          v-model="virtualScrollEnabled"
+          type="checkbox"
+          class="accent-primary"
+        >
+        Virtual scroll
+      </label>
+    </div>
+
     <div
       ref="tableContainer"
       class="benchmark-primevue-table relative isolate overflow-hidden rounded border border-surface-dark"
     >
       <DataTable
-        :value="species"
+        v-model:expanded-rows="expandedRows"
+        :value="filteredSpecies"
         scrollable
         scroll-height="600px"
-        :virtual-scroller-options="{ itemSize: 40 }"
+        :virtual-scroller-options="virtualScrollEnabled ? { itemSize: 40 } : undefined"
         class="benchmark-table text-sm"
       >
+        <Column
+          expander
+          style="width: 3rem"
+        />
         <Column
           field="benchmarkOrder"
           header="ID"
@@ -110,6 +170,24 @@ onMounted(async () => {
           field="taxonomicStatus"
           header="Status"
         />
+        <template #expansion="{ data }">
+          <div class="px-4 py-2">
+            <div
+              v-for="v in matchedVernaculars(data)"
+              :key="v.vernacularName"
+              class="text-sm text-text-muted"
+            >
+              {{ v.vernacularName }}
+              <span class="ml-1 text-xs opacity-60">({{ v.language }})</span>
+            </div>
+            <div
+              v-if="matchedVernaculars(data).length === 0"
+              class="text-xs text-text-muted opacity-50"
+            >
+              No matching common names
+            </div>
+          </div>
+        </template>
       </DataTable>
     </div>
   </div>

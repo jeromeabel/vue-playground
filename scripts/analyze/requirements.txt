@@ -1,3 +1,2 @@
 matplotlib>=3.8
 seaborn>=0.13
-json5>=0.9

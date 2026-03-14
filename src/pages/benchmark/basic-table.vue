@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { onBeforeMount, onMounted, ref, useTemplateRef } from "vue";
+import { computed, onBeforeMount, onMounted, ref, useTemplateRef } from "vue";
 
 import type { GbifSpeciesSummary } from "@/api/gbif";
 import MetricsPanel from "@/components/metrics-panel.vue";
 import { useDomMetrics } from "@/composables/use-dom-metrics";
+import { useDebounce } from "@/composables/use-debounce";
 
 type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number };
 
 const species = ref<BenchmarkedSpecies[]>([]);
 const tableContainer = useTemplateRef("tableContainer");
+const searchInput = ref("");
+const query = useDebounce(searchInput, 300);
 
 const {
     mountTimeMs,
@@ -25,11 +28,12 @@ onBeforeMount(() => {
 });
 
 onMounted(async () => {
-    const res = await fetch("/data/species-3000.json");
+    const res = await fetch("/data/species-10000.json");
     const data = await res.json() as GbifSpeciesSummary[];
     species.value = data.map((item, index) => ({
         ...item,
         benchmarkOrder: index + 1,
+        vernacularNames: item.vernacularNames ?? [],
     }));
 
     requestAnimationFrame(() => {
@@ -40,6 +44,29 @@ onMounted(async () => {
         startFpsCounter();
     });
 });
+
+const filteredSpecies = computed(() => {
+    if (!query.value) return species.value;
+    const q = query.value.toLowerCase();
+    return species.value.filter(s =>
+        s.canonicalName.toLowerCase().includes(q)
+        || s.family.toLowerCase().includes(q)
+        || s.genus.toLowerCase().includes(q)
+        || s.vernacularNames.some(v => v.vernacularName.toLowerCase().includes(q)),
+    );
+});
+
+function matchedVernaculars(s: BenchmarkedSpecies) {
+    if (!query.value) return [];
+    const q = query.value.toLowerCase();
+    return s.vernacularNames.filter(v => v.vernacularName.toLowerCase().includes(q));
+}
+
+function highlight(text: string): string {
+    if (!query.value) return text;
+    const q = query.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return text.replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+}
 </script>
 
 <template>
@@ -60,6 +87,18 @@ onMounted(async () => {
       :dom-node-count="domNodeCount"
       :fps="fps"
     />
+
+    <div class="mb-3 flex items-center gap-3">
+      <input
+        v-model="searchInput"
+        type="search"
+        placeholder="Search name, family, genus, common name…"
+        class="w-full max-w-md rounded border border-surface-dark bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+      >
+      <span class="text-sm text-text-muted">
+        {{ filteredSpecies.length.toLocaleString() }} / {{ species.length.toLocaleString() }}
+      </span>
+    </div>
 
     <div
       ref="tableContainer"
@@ -92,35 +131,60 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="s in species"
+          <template
+            v-for="s in filteredSpecies"
             :key="s.key"
-            class="border-b border-surface-dark/50"
           >
-            <td class="px-3 py-2 font-mono text-text-muted">
-              {{ s.benchmarkOrder }}
-            </td>
-            <td class="px-3 py-2 italic">
-              {{ s.canonicalName }}
-            </td>
-            <td class="px-3 py-2">
-              {{ s.family }}
-            </td>
-            <td class="px-3 py-2">
-              {{ s.genus }}
-            </td>
-            <td class="px-3 py-2">
-              {{ s.order }}
-            </td>
-            <td class="px-3 py-2">
-              {{ s.class }}
-            </td>
-            <td class="px-3 py-2">
-              {{ s.taxonomicStatus }}
-            </td>
-          </tr>
+            <tr class="border-b border-surface-dark/50">
+              <td class="px-3 py-2 font-mono text-text-muted">
+                {{ s.benchmarkOrder }}
+              </td>
+              <td
+                class="px-3 py-2 italic"
+                v-html="highlight(s.canonicalName)"
+              />
+              <td
+                class="px-3 py-2"
+                v-html="highlight(s.family)"
+              />
+              <td
+                class="px-3 py-2"
+                v-html="highlight(s.genus)"
+              />
+              <td class="px-3 py-2">
+                {{ s.order }}
+              </td>
+              <td class="px-3 py-2">
+                {{ s.class }}
+              </td>
+              <td class="px-3 py-2">
+                {{ s.taxonomicStatus }}
+              </td>
+            </tr>
+            <tr
+              v-for="v in matchedVernaculars(s)"
+              :key="`${s.key}-${v.vernacularName}`"
+              class="border-b border-surface-dark/30 bg-surface-50"
+            >
+              <td
+                colspan="7"
+                class="px-8 py-1 text-sm text-text-muted"
+              >
+                <span v-html="highlight(v.vernacularName)" />
+                <span class="ml-1 text-xs opacity-60">({{ v.language }})</span>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(mark) {
+  background: oklch(94% 0.12 100);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+</style>

@@ -12,6 +12,7 @@ export interface GbifSpeciesSummary {
     genus: string;
     taxonomicStatus: string;
     rank: string;
+    vernacularNames: { vernacularName: string; language: string }[];
 }
 
 export interface GbifSpeciesDetail extends GbifSpeciesSummary {

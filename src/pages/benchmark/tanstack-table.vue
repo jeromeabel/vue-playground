@@ -11,12 +11,18 @@ import { useVirtualizer } from "@tanstack/vue-virtual";
 import type { GbifSpeciesSummary } from "@/api/gbif";
 import MetricsPanel from "@/components/metrics-panel.vue";
 import { useDomMetrics } from "@/composables/use-dom-metrics";
+import { useDebounce } from "@/composables/use-debounce";
 
 type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number };
+type VernacularRow = { type: "vernacular"; data: { vernacularName: string; language: string }; parentKey: number };
+type SpeciesRow = { type: "species"; data: BenchmarkedSpecies };
+type FlatRow = SpeciesRow | VernacularRow;
 
 const species = ref<BenchmarkedSpecies[]>([]);
 const tableContainer = useTemplateRef("tableContainer");
 const scrollContainer = useTemplateRef("scrollContainer");
+const searchInput = ref("");
+const query = useDebounce(searchInput, 300);
 
 const {
     mountTimeMs,
@@ -75,37 +81,78 @@ const columns = [
     }),
 ];
 
+const filteredSpecies = computed(() => {
+    if (!query.value) return species.value;
+    const q = query.value.toLowerCase();
+    return species.value.filter(s =>
+        s.canonicalName.toLowerCase().includes(q)
+        || s.family.toLowerCase().includes(q)
+        || s.genus.toLowerCase().includes(q)
+        || s.vernacularNames.some(v => v.vernacularName.toLowerCase().includes(q)),
+    );
+});
+
+const flattenedRows = computed<FlatRow[]>(() => {
+    if (!query.value) {
+        return filteredSpecies.value.map(s => ({ type: "species" as const, data: s }));
+    }
+    const q = query.value.toLowerCase();
+    const rows: FlatRow[] = [];
+    for (const s of filteredSpecies.value) {
+        rows.push({ type: "species", data: s });
+        const matched = s.vernacularNames.filter(v =>
+            v.vernacularName.toLowerCase().includes(q),
+        );
+        for (const v of matched) {
+            rows.push({ type: "vernacular", data: v, parentKey: s.key });
+        }
+    }
+    return rows;
+});
+
 const table = useVueTable({
-    get data() { return species.value; },
+    get data() { return filteredSpecies.value; },
     columns,
     getCoreRowModel: getCoreRowModel(),
 });
 
-const rows = computed(() => table.getRowModel().rows);
 // canonicalName is the single flex-grow column; all others use fixed px sizes.
 const GROW_COLUMN = "canonicalName";
 
 const virtualizerOptions = computed(() => ({
-    count: rows.value.length,
-    estimateSize: () => 40,
+    count: flattenedRows.value.length,
+    estimateSize: (index: number) => flattenedRows.value[index]?.type === "vernacular" ? 32 : 40,
     getScrollElement: () => scrollContainer.value ?? null,
     overscan: 20,
 }));
 
 const virtualizer = useVirtualizer(virtualizerOptions);
-const virtualRows = computed(() => virtualizer.value.getVirtualItems());
+const virtualItems = computed(() => virtualizer.value.getVirtualItems());
 const totalSize = computed(() => virtualizer.value.getTotalSize());
+
+const headerGroups = computed(() => table.getHeaderGroups());
+const columnCount = computed(() => columns.length);
+
+// O(1) lookup: species key → TanStack row (used in template for cell rendering)
+const rowByKey = computed(() => {
+    const map = new Map<number, ReturnType<typeof table.getRowModel>["rows"][number]>();
+    for (const row of table.getRowModel().rows) {
+        map.set(row.original.key, row);
+    }
+    return map;
+});
 
 onBeforeMount(() => {
     markBeforeMount();
 });
 
 onMounted(async () => {
-    const res = await fetch("/data/species-3000.json");
+    const res = await fetch("/data/species-10000.json");
     const data = await res.json() as GbifSpeciesSummary[];
     species.value = data.map((item, index) => ({
         ...item,
         benchmarkOrder: index + 1,
+        vernacularNames: item.vernacularNames ?? [],
     }));
 
     requestAnimationFrame(() => {
@@ -137,6 +184,18 @@ onMounted(async () => {
       :fps="fps"
     />
 
+    <div class="mb-3 flex items-center gap-3">
+      <input
+        v-model="searchInput"
+        type="search"
+        placeholder="Search name, family, genus, common name…"
+        class="w-full max-w-md rounded border border-surface-dark bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+      >
+      <span class="text-sm text-text-muted">
+        {{ filteredSpecies.length.toLocaleString() }} / {{ species.length.toLocaleString() }}
+      </span>
+    </div>
+
     <div ref="tableContainer">
       <div
         ref="scrollContainer"
@@ -145,21 +204,21 @@ onMounted(async () => {
         <table class="w-full table-fixed text-left text-sm">
           <colgroup>
             <col
-              v-for="header in table.getHeaderGroups()[0]?.headers"
+              v-for="header in headerGroups[0]?.headers"
               :key="header.id"
               :style="header.column.id !== GROW_COLUMN ? { width: `${header.getSize()}px` } : {}"
             >
           </colgroup>
           <thead class="sticky top-0 z-20 bg-sand-50">
             <tr
-              v-for="headerGroup in table.getHeaderGroups()"
+              v-for="headerGroup in headerGroups"
               :key="headerGroup.id"
               class="border-b border-surface-dark"
             >
               <th
                 v-for="header in headerGroup.headers"
                 :key="header.id"
-                class="px-3 py-2 font-semibold whitespace-nowrap overflow-hidden text-ellipsis"
+                class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold"
               >
                 <FlexRender
                   :render="header.column.columnDef.header"
@@ -170,7 +229,7 @@ onMounted(async () => {
           </thead>
           <tbody :style="{ height: `${totalSize}px`, position: 'relative' }">
             <tr
-              v-for="virtualRow in virtualRows"
+              v-for="virtualRow in virtualItems"
               :key="virtualRow.index"
               :style="{
                 position: 'absolute',
@@ -182,24 +241,41 @@ onMounted(async () => {
                 display: 'flex',
               }"
               class="relative z-0 border-b border-surface-dark/50"
+              :class="{
+                'bg-surface-50': flattenedRows[virtualRow.index]?.type === 'vernacular',
+              }"
             >
-              <td
-                v-for="cell in rows[virtualRow.index]?.getVisibleCells()"
-                :key="cell.id"
-                class="px-3 py-2 overflow-hidden text-ellipsis"
-                :class="{
-                  'font-mono text-text-muted': cell.column.id === 'benchmarkOrder',
-                  'italic whitespace-nowrap': cell.column.id === GROW_COLUMN,
-                }"
-                :style="cell.column.id !== GROW_COLUMN
-                  ? { flex: 'none', width: `${cell.column.getSize()}px`, minWidth: `${cell.column.getSize()}px` }
-                  : { flex: '1', minWidth: '0' }"
-              >
-                <FlexRender
-                  :render="cell.column.columnDef.cell"
-                  :props="cell.getContext()"
-                />
-              </td>
+              <template v-if="flattenedRows[virtualRow.index]?.type === 'species'">
+                <td
+                  v-for="cell in rowByKey.get((flattenedRows[virtualRow.index] as SpeciesRow).data.key)?.getVisibleCells()"
+                  :key="cell.id"
+                  class="overflow-hidden text-ellipsis px-3 py-2"
+                  :class="{
+                    'font-mono text-text-muted': cell.column.id === 'benchmarkOrder',
+                    'italic whitespace-nowrap': cell.column.id === GROW_COLUMN,
+                  }"
+                  :style="cell.column.id !== GROW_COLUMN
+                    ? { flex: 'none', width: `${cell.column.getSize()}px`, minWidth: `${cell.column.getSize()}px` }
+                    : { flex: '1', minWidth: '0' }"
+                >
+                  <FlexRender
+                    :render="cell.column.columnDef.cell"
+                    :props="cell.getContext()"
+                  />
+                </td>
+              </template>
+              <template v-else-if="flattenedRows[virtualRow.index]?.type === 'vernacular'">
+                <td
+                  :colspan="columnCount"
+                  class="px-8 py-1 text-sm text-text-muted"
+                  style="flex: 1; min-width: 0;"
+                >
+                  {{ (flattenedRows[virtualRow.index] as VernacularRow).data.vernacularName }}
+                  <span class="ml-1 text-xs opacity-60">
+                    ({{ (flattenedRows[virtualRow.index] as VernacularRow).data.language }})
+                  </span>
+                </td>
+              </template>
             </tr>
           </tbody>
         </table>

@@ -31,23 +31,42 @@ const query = refDebounced(searchInput, 300)
 
 The custom `src/composables/use-debounce.ts` is deleted — not moved to any feature folder.
 
+Both `@vueuse/core` and `zod` must be added to `package.json` as dependencies (`pnpm add @vueuse/core zod`).
+
 ### `zod` — Runtime validation at API boundaries
 
 Zod validates GBIF API responses and static JSON at runtime boundaries. If GBIF changes their API shape, the app gets a clear validation error instead of `undefined` propagating into components.
 
 **Where it applies:**
 - `src/features/species/api.ts` — validate each GBIF response against a Zod schema
-- `src/features/benchmark/pages/*.vue` — validate the static JSON load
 
 **Where it does NOT apply:**
 - Internal composable-to-component data flow (already typed by TypeScript)
 - TanStack Query cache operations
+- Benchmark static JSON (`public/data/species-10000.json`) — this is a checked-in file under project control, not an external boundary. TypeScript typing is sufficient.
 
-**Schema location:** Zod schemas live alongside the types they validate in `src/features/species/types.ts`. The types are inferred from schemas (`z.infer<typeof SpeciesSummarySchema>`) rather than hand-written separately.
+**Schema location:** Zod schemas live alongside the types they validate in `src/features/species/types.ts`. The types are inferred from schemas (`z.infer<typeof SpeciesSummarySchema>`) rather than hand-written separately. All 7 current interfaces become Zod schemas:
+
+| Current interface | Zod schema |
+|---|---|
+| `GbifSpeciesSummary` | `GbifSpeciesSummarySchema` |
+| `GbifSpeciesDetail` | `GbifSpeciesDetailSchema` (extends `GbifSpeciesSummarySchema.extend({...})`) |
+| `GbifSearchResponse` | `GbifSearchResponseSchema` |
+| `GbifMediaItem` | `GbifMediaItemSchema` |
+| `GbifMediaResponse` | `GbifMediaResponseSchema` |
+| `GbifVernacularName` | `GbifVernacularNameSchema` |
+| `GbifVernacularNamesResponse` | `GbifVernacularNamesResponseSchema` |
+
+**Behavioral note:** The `vernacularNames` field uses `.default([])` in the schema because the GBIF API sometimes omits it (evidenced by `?? []` fallbacks in current code). With Zod, consumers no longer need the `?? []` fallback — the schema guarantees the array.
 
 ```ts
 // src/features/species/types.ts
 import { z } from "zod"
+
+const VernacularNameSchema = z.object({
+  vernacularName: z.string(),
+  language: z.string(),
+})
 
 export const GbifSpeciesSummarySchema = z.object({
   key: z.number(),
@@ -61,22 +80,37 @@ export const GbifSpeciesSummarySchema = z.object({
   genus: z.string(),
   taxonomicStatus: z.string(),
   rank: z.string(),
-  vernacularNames: z.array(z.object({
-    vernacularName: z.string(),
-    language: z.string(),
-  })).default([]),
+  vernacularNames: z.array(VernacularNameSchema).default([]),
 })
 
 export type GbifSpeciesSummary = z.infer<typeof GbifSpeciesSummarySchema>
 
-// ... other schemas and inferred types
+export const GbifSpeciesDetailSchema = GbifSpeciesSummarySchema.extend({
+  authorship: z.string(),
+  publishedIn: z.string().optional(),
+  nameType: z.string(),
+  numDescendants: z.number(),
+})
+
+export type GbifSpeciesDetail = z.infer<typeof GbifSpeciesDetailSchema>
+
+// ... remaining schemas follow the same pattern
 ```
 
 ```ts
 // src/features/species/api.ts
 import { GbifSearchResponseSchema } from "./types"
 
-export async function searchSpecies(offset = 0, limit = 20) {
+export async function searchSpecies(offset = 0, limit = 20, query?: string) {
+  // query parameter is optional — omit for paginated list, provide for search
+  const params = new URLSearchParams({
+    rank: "SPECIES",
+    highertaxon_key: "6",
+    status: "ACCEPTED",
+    limit: String(limit),
+    offset: String(offset),
+    ...(query ? { q: query } : {}),
+  })
   const res = await fetch(`${BASE_URL}/species/search?${params}`)
   if (!res.ok) throw new Error(`GBIF search failed: ${res.status}`)
   return GbifSearchResponseSchema.parse(await res.json())
@@ -100,7 +134,7 @@ TanStack Query already encodes the success/error/loading state for every async o
 - Pages: index (`/benchmark`), `basic-table`, `primevue-table`, `tanstack-table`
 - Components: `metrics-panel`
 - Composables: `use-dom-metrics`
-- Types: `BenchmarkedSpecies` (extracted to `benchmark/types.ts`)
+- Types: `BenchmarkedSpecies` in `benchmark/types.ts` — a plain TypeScript type (not a Zod schema), importing `GbifSpeciesSummary` type-only from species
 - Cross-feature type import: `GbifSpeciesSummary` from species (type-only)
 
 ### `shared` — App-wide code
@@ -257,9 +291,10 @@ src/
 - `src/components/` (empty after moves)
 - `src/pages/species/` (empty, routes now served from feature folder)
 - `src/pages/benchmark/` (empty, routes now served from feature folder)
-- `src/router/index.ts` — legacy manual router, superseded by `src/router.ts`
-- `src/pages/home-page.vue` — dead file, superseded by `src/pages/index.vue`
+- `src/router/index.ts` — legacy manual router, superseded by `src/router.ts` (`main.ts` imports from `./router.ts`, not the directory)
+- `src/pages/home-page.vue` — dead file, superseded by `src/pages/index.vue` (`app.spec.ts` imports this and must be updated)
 - `src/__tests__/app.test.ts` — skipped, not part of the new test strategy
+- `src/__tests__/` — directory removed after `app.test.ts` deletion
 
 ## Vite Configuration
 
@@ -343,17 +378,20 @@ Pragmatic, feature-scoped testing with Vitest + Vue Test Utils + happy-dom.
 
 **Species feature:**
 - `types.ts` — Zod schemas validate correct data and reject malformed data
-- `api.ts` — API functions call correct endpoints and validate responses (mock `fetch`)
+- `api.ts` — API functions call correct endpoints, pass query param, and validate responses (mock `fetch`)
 - `use-species-list.ts` — composable returns paginated data, handles prefetching
 - `use-species-search.ts` — composable debounces query, enables/disables based on input length
+- `use-species-detail.ts` — composable seeds initial data from list cache, triggers dependent queries
 - `species-card.vue` — renders species name and taxonomy, prefetches on hover
+
+**Not tested (thin wrappers):**
+- `use-species-media.ts`, `use-vernacular-names.ts` — trivially thin: a single `useQuery` call with `enabled` flag. The enabling logic is tested via `use-species-detail.ts` which orchestrates them.
 
 **Benchmark feature:**
 - `use-dom-metrics.ts` — existing test, moved (mount time, DOM count, FPS tracking)
-- `types.ts` — `BenchmarkedSpecies` schema validates correctly
 
 **App shell:**
-- `app.spec.ts` — stays at root, tests the app shell renders
+- `app.spec.ts` — stays at root, updated to remove `home-page.vue` import (dead file being deleted). Tests the app shell renders with router.
 
 ### What NOT to test
 
@@ -369,7 +407,9 @@ src/features/species/
 ├── __tests__/
 │   ├── api.test.ts
 │   ├── types.test.ts
-│   └── use-species-search.test.ts
+│   ├── use-species-list.test.ts
+│   ├── use-species-search.test.ts
+│   └── use-species-detail.test.ts
 ├── components/
 │   └── __tests__/
 │       └── species-card.test.ts

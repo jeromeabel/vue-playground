@@ -4,29 +4,35 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from analyze_lighthouse import extract_metrics, status_emoji
 
 
-def test_returns_all_ten_keys(lighthouse_before):
-    metrics = extract_metrics(lighthouse_before)
+def test_returns_all_ten_keys(lighthouse_basic):
+    metrics = extract_metrics(lighthouse_basic)
     expected_keys = {"Score", "FCP", "LCP", "TBT", "TTI", "SI", "Max FID", "CLS", "DOM Size", "MT Work"}
     assert set(metrics.keys()) == expected_keys
 
 
-def test_score_is_percentage(lighthouse_before):
-    metrics = extract_metrics(lighthouse_before)
+def test_score_is_percentage(lighthouse_basic):
+    metrics = extract_metrics(lighthouse_basic)
     assert isinstance(metrics["Score"], int)
     assert 0 <= metrics["Score"] <= 100
 
 
-def test_known_baseline_values(lighthouse_before):
-    metrics = extract_metrics(lighthouse_before)
-    assert metrics["Score"] == 33
-    assert metrics["DOM Size"] == 6366
-    assert 5900 <= metrics["FCP"] <= 6100
+def test_known_basic_values(lighthouse_basic):
+    metrics = extract_metrics(lighthouse_basic)
+    assert metrics["Score"] == 92
+    assert metrics["DOM Size"] == 382
+    assert 900 <= metrics["FCP"] <= 1200
 
 
-def test_known_phase3_values(lighthouse_phase3):
-    metrics = extract_metrics(lighthouse_phase3)
-    assert metrics["Score"] == 42
-    assert metrics["DOM Size"] == 1705
+def test_known_primevue_values(lighthouse_primevue):
+    metrics = extract_metrics(lighthouse_primevue)
+    assert metrics["Score"] == 72
+    assert metrics["DOM Size"] == 407
+
+
+def test_known_tanstack_values(lighthouse_tanstack):
+    metrics = extract_metrics(lighthouse_tanstack)
+    assert metrics["Score"] == 74
+    assert metrics["DOM Size"] == 671
 
 
 def test_missing_audit_returns_zero():

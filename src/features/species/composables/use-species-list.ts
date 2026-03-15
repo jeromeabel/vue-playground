@@ -1,7 +1,7 @@
 import { computed, type Ref } from "vue";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/vue-query";
 
-import { searchSpecies } from "@/api/gbif";
+import { searchSpecies } from "../api";
 
 const PAGE_SIZE = 20;
 

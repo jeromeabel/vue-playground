@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onMounted, ref, useTemplateRef } from "vue";
 
-import type { GbifSpeciesSummary } from "@/api/gbif";
-import MetricsPanel from "@/components/metrics-panel.vue";
-import { useDomMetrics } from "@/composables/use-dom-metrics";
-import { useDebounce } from "@/composables/use-debounce";
-
-type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number };
+import { refDebounced } from "@vueuse/core";
+import type { GbifSpeciesSummary } from "@/features/species/types";
+import MetricsPanel from "../components/metrics-panel.vue";
+import { useDomMetrics } from "../composables/use-dom-metrics";
+import type { BenchmarkedSpecies } from "../types";
 
 const species = ref<BenchmarkedSpecies[]>([]);
 const tableContainer = useTemplateRef("tableContainer");
 const searchInput = ref("");
-const query = useDebounce(searchInput, 300);
+const query = refDebounced(searchInput, 300);
 
 const {
     mountTimeMs,

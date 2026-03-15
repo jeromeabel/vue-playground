@@ -1,7 +1,7 @@
 import { computed, type Ref } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 
-import { getSpeciesMedia } from "@/api/gbif";
+import { getSpeciesMedia } from "../api";
 
 export function useSpeciesMedia(id: Ref<number>, enabled: Ref<boolean>) {
     return useQuery({

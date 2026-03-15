@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BenchmarkResults } from "@/api/benchmark-types";
+import type { BenchmarkResults } from "../types";
 
 const props = defineProps<{
     results: BenchmarkResults;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import BenchmarkTable from "@/components/benchmark-table.vue";
-import { useBenchmarkResults } from "@/composables/use-benchmark-results";
+import BenchmarkTable from "../components/benchmark-table.vue";
+import { useBenchmarkResults } from "../composables/use-benchmark-results";
 
 const { data, isPending, isError } = useBenchmarkResults();
 </script>

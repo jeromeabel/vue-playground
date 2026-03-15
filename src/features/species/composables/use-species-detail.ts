@@ -1,7 +1,8 @@
 import { computed, type Ref } from "vue";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 
-import { getSpecies, type GbifSpeciesSummary } from "@/api/gbif";
+import { getSpecies } from "../api";
+import type { GbifSpeciesSummary } from "../types";
 
 export function useSpeciesDetail(id: Ref<number>) {
     const queryClient = useQueryClient();

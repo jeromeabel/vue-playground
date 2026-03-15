@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useQueryClient } from "@tanstack/vue-query";
 
-import { getSpecies, getSpeciesMedia, type GbifSpeciesSummary } from "@/api/gbif";
+import { getSpecies, getSpeciesMedia } from "../api";
+import type { GbifSpeciesSummary } from "../types";
 
 const props = defineProps<{
     species: GbifSpeciesSummary;

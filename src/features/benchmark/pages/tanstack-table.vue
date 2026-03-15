@@ -8,12 +8,11 @@ import {
 } from "@tanstack/vue-table";
 import { useVirtualizer } from "@tanstack/vue-virtual";
 
-import type { GbifSpeciesSummary } from "@/api/gbif";
-import MetricsPanel from "@/components/metrics-panel.vue";
-import { useDomMetrics } from "@/composables/use-dom-metrics";
-import { useDebounce } from "@/composables/use-debounce";
-
-type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number };
+import { refDebounced } from "@vueuse/core";
+import type { GbifSpeciesSummary } from "@/features/species/types";
+import MetricsPanel from "../components/metrics-panel.vue";
+import { useDomMetrics } from "../composables/use-dom-metrics";
+import type { BenchmarkedSpecies } from "../types";
 type VernacularRow = { type: "vernacular"; data: { vernacularName: string; language: string }; parentKey: number };
 type SpeciesRow = { type: "species"; data: BenchmarkedSpecies };
 type FlatRow = SpeciesRow | VernacularRow;
@@ -22,7 +21,7 @@ const species = ref<BenchmarkedSpecies[]>([]);
 const tableContainer = useTemplateRef("tableContainer");
 const scrollContainer = useTemplateRef("scrollContainer");
 const searchInput = ref("");
-const query = useDebounce(searchInput, 300);
+const query = refDebounced(searchInput, 300);
 
 const {
     mountTimeMs,

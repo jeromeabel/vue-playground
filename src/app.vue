@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { VueQueryDevtools } from "@tanstack/vue-query-devtools";
 
-import AppHeader from "@/components/app-header.vue";
+import AppHeader from "@/shared/components/app-header.vue";
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/vue-query";
-import type { BenchmarkResults } from "@/api/benchmark-types";
+import type { BenchmarkResults } from "../types";
 
 export function useBenchmarkResults() {
     return useQuery({

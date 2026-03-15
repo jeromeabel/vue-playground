@@ -29,5 +29,6 @@ export default defineConfig({
         environment: "happy-dom",
         globals: true,
         css: true,
+        exclude: ["node_modules/**", ".docs/**"],
     },
 });

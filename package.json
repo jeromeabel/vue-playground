@@ -17,7 +17,10 @@
     "lighthouse:primevue": "mkdir -p scripts/analyze/reports && pnpm dlx lighthouse http://localhost:5173/benchmark/primevue-table --preset=desktop --output=json --output-path=scripts/analyze/reports/primevue.json --chrome-flags='--headless=new'",
     "lighthouse:tanstack": "mkdir -p scripts/analyze/reports && pnpm dlx lighthouse http://localhost:5173/benchmark/tanstack-table --preset=desktop --output=json --output-path=scripts/analyze/reports/tanstack.json --chrome-flags='--headless=new'",
     "lighthouse:all": "pnpm lighthouse:basic && pnpm lighthouse:primevue && pnpm lighthouse:tanstack",
-    "analyze:lighthouse": "uv run --with-requirements scripts/analyze/requirements.txt python3 scripts/analyze/analyze_lighthouse.py scripts/analyze/reports/basic.json scripts/analyze/reports/primevue.json scripts/analyze/reports/tanstack.json -o scripts/analyze/reports/lighthouse-comparison.png"
+    "analyze:lighthouse": "uv run --with-requirements scripts/analyze/requirements.txt python3 scripts/analyze/analyze_lighthouse.py scripts/analyze/reports/basic.json scripts/analyze/reports/primevue.json scripts/analyze/reports/tanstack.json -o scripts/analyze/reports/lighthouse-comparison.png",
+    "analyze:lighthouse:json": "uv run --with-requirements scripts/analyze/requirements.txt python3 scripts/analyze/analyze_lighthouse.py scripts/analyze/reports/basic.json scripts/analyze/reports/primevue.json scripts/analyze/reports/tanstack.json --json-out public/data/benchmark-results.json",
+    "test:python": "uv run --with-requirements scripts/analyze/requirements.txt pytest scripts/analyze/tests/ -v",
+    "test:python:fast": "uv run --with-requirements scripts/analyze/requirements.txt pytest scripts/analyze/tests/ -v -m 'not slow'"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.92.9",

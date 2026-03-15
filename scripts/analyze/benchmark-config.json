@@ -1,0 +1,21 @@
+{
+  "$comment": "Recommended settings for reproducible benchmarks",
+  "iterations": 5,
+  "aggregation": "median",
+  "lighthouse": {
+    "preset": "desktop",
+    "chromeFlags": "--headless=new",
+    "networkProfile": "default (no throttling for desktop preset)"
+  },
+  "meaningfulMetrics": {
+    "primary": ["Score", "TBT", "LCP", "DOM Size"],
+    "secondary": ["FCP", "SI", "TTI", "CLS"],
+    "trace": ["fps", "longest_task_ms", "scripting_ms_per_s", "long_tasks_count"]
+  },
+  "notes": {
+    "iterations": "Run 5+ times and take the median to reduce variance",
+    "environment": "Close other tabs, disable extensions, use Incognito",
+    "networkProfile": "Desktop preset uses no throttling; for mobile simulation use --throttling-method=simulate",
+    "meaningfulMetrics": "TBT and DOM Size are the most discriminating for table rendering benchmarks; LCP and Score give the overall picture"
+  }
+}

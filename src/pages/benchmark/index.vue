@@ -1,3 +1,10 @@
+<script setup lang="ts">
+import BenchmarkTable from "@/components/benchmark-table.vue";
+import { useBenchmarkResults } from "@/composables/use-benchmark-results";
+
+const { data, isPending, isError } = useBenchmarkResults();
+</script>
+
 <template>
   <div>
     <h1 class="mb-4 text-2xl font-bold">
@@ -50,102 +57,23 @@
         Lighthouse desktop preset · 5 runs · median · Chrome Incognito · 10,000 species dataset
       </p>
 
-      <div class="overflow-auto rounded border border-surface-dark">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-sand-50">
-            <tr class="border-b border-surface-dark">
-              <th class="px-4 py-3 font-semibold">
-                Metric
-              </th>
-              <th class="px-4 py-3 font-semibold">
-                Basic
-              </th>
-              <th class="px-4 py-3 font-semibold">
-                PrimeVue
-              </th>
-              <th class="px-4 py-3 font-semibold">
-                TanStack
-              </th>
-              <th class="px-4 py-3 font-semibold text-text-muted">
-                Threshold
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-surface-dark/50">
-              <td class="px-4 py-2.5 font-medium">
-                Performance Score
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-red-600">56</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-yellow-600">74</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-green-600">76</span>
-              </td>
-              <td class="px-4 py-2.5 text-text-muted">
-                &gt; 90
-              </td>
-            </tr>
-            <tr class="border-b border-surface-dark/50">
-              <td class="px-4 py-2.5 font-medium">
-                TBT (ms)
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-red-600">472</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-yellow-600">44</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-green-600">4</span>
-              </td>
-              <td class="px-4 py-2.5 text-text-muted">
-                &lt; 200
-              </td>
-            </tr>
-            <tr class="border-b border-surface-dark/50">
-              <td class="px-4 py-2.5 font-medium">
-                DOM Size
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-red-600">80,379</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-green-600">708</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-green-600">668</span>
-              </td>
-              <td class="px-4 py-2.5 text-text-muted">
-                &lt; 1,500
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2.5 font-medium">
-                LCP (ms)
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-red-600">4,472</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-red-600">5,154</span>
-              </td>
-              <td class="px-4 py-2.5">
-                <span class="font-mono text-red-600">4,601</span>
-              </td>
-              <td class="px-4 py-2.5 text-text-muted">
-                &lt; 2,500
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="mt-2 text-xs text-text-muted">
-        Numbers captured before search feature was added. Re-run <code class="rounded bg-surface-dark/30 px-1">pnpm lighthouse:all && pnpm analyze:lighthouse</code> to update.
-      </p>
+      <template v-if="isPending">
+        <p class="text-sm text-text-muted">
+          Loading benchmark results...
+        </p>
+      </template>
+      <template v-else-if="isError">
+        <p class="text-sm text-text-muted">
+          No benchmark data found. Run <code class="rounded bg-surface-dark/30 px-1">pnpm analyze:lighthouse:json</code> to generate results.
+        </p>
+      </template>
+      <template v-else-if="data">
+        <BenchmarkTable :results="data" />
+        <p class="mt-2 text-xs text-text-muted">
+          Generated {{ new Date(data.generatedAt).toLocaleDateString() }}.
+          Re-run <code class="rounded bg-surface-dark/30 px-1">pnpm lighthouse:all && pnpm analyze:lighthouse:json</code> to update.
+        </p>
+      </template>
     </section>
   </div>
 </template>

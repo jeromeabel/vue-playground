@@ -8,7 +8,11 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
     plugins: [
         VueRouter({
-            routesFolder: "src/pages",
+            routesFolder: [
+                { src: "src/features/species/pages", path: "species/" },
+                { src: "src/features/benchmark/pages", path: "benchmark/" },
+                "src/pages",
+            ],
             dts: "./typed-router.d.ts",
             extensions: [".vue"],
             importMode: "async",

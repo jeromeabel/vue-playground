@@ -37,6 +37,48 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/benchmark/': RouteRecordInfo<
+      '/benchmark/',
+      '/benchmark',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/benchmark/basic-table': RouteRecordInfo<
+      '/benchmark/basic-table',
+      '/benchmark/basic-table',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/benchmark/primevue-table': RouteRecordInfo<
+      '/benchmark/primevue-table',
+      '/benchmark/primevue-table',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/benchmark/tanstack-table': RouteRecordInfo<
+      '/benchmark/tanstack-table',
+      '/benchmark/tanstack-table',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/species/': RouteRecordInfo<
+      '/species/',
+      '/species',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/species/[id]': RouteRecordInfo<
+      '/species/[id]',
+      '/species/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
   }
 
   /**
@@ -59,6 +101,42 @@ declare module 'vue-router/auto-routes' {
     'src/pages/about.vue': {
       routes:
         | '/about'
+      views:
+        | never
+    }
+    'src/features/benchmark/pages/index.vue': {
+      routes:
+        | '/benchmark/'
+      views:
+        | never
+    }
+    'src/features/benchmark/pages/basic-table.vue': {
+      routes:
+        | '/benchmark/basic-table'
+      views:
+        | never
+    }
+    'src/features/benchmark/pages/primevue-table.vue': {
+      routes:
+        | '/benchmark/primevue-table'
+      views:
+        | never
+    }
+    'src/features/benchmark/pages/tanstack-table.vue': {
+      routes:
+        | '/benchmark/tanstack-table'
+      views:
+        | never
+    }
+    'src/features/species/pages/index.vue': {
+      routes:
+        | '/species/'
+      views:
+        | never
+    }
+    'src/features/species/pages/[id].vue': {
+      routes:
+        | '/species/[id]'
       views:
         | never
     }

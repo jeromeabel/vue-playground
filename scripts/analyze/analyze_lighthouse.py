@@ -11,6 +11,10 @@ Usage:
 
 Each JSON is a Lighthouse report exported via:
     lighthouse http://localhost:5173/benchmark/basic-table --output json --output-path basic.json
+
+WARNING: Run against a production build (`pnpm build && pnpm preview`), not `pnpm dev`.
+Vite's dev server adds HMR overhead, unoptimized modules, and source maps that inflate
+TBT, LCP, and DOM Size — producing metrics that don't reflect real-world performance.
 """
 import argparse
 import json
@@ -321,6 +325,13 @@ def main():
         if "audits" not in report:
             print(f"Error: {path_str} does not look like a Lighthouse report (no 'audits' key)", file=sys.stderr)
             sys.exit(1)
+        url = report.get("requestedUrl", "") or report.get("finalUrl", "")
+        if ":5173" in url:
+            print(
+                f"Warning: {path_str} was captured against a dev server ({url}).\n"
+                "  Results will be inflated. Use `pnpm build && pnpm preview` for accurate metrics.",
+                file=sys.stderr,
+            )
         data[name] = extract_metrics(report)
 
     # JSON mode

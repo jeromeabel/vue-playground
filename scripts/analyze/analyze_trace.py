@@ -10,6 +10,10 @@ Usage:
     python analyze_trace.py trace-basic.json trace-tanstack.json -o trace-comparison.png
 
 Export traces from Chrome DevTools: Performance tab > Save Profile.
+
+WARNING: Record traces against a production build (`pnpm build && pnpm preview`), not `pnpm dev`.
+Vite's dev server adds HMR overhead, unoptimized modules, and source maps that inflate
+scripting time, long tasks, and frame drops — producing metrics that don't reflect real-world performance.
 """
 import argparse
 import json

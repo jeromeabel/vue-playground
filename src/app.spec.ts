@@ -1,10 +1,10 @@
-import { mount } from "@vue/test-utils"
-import { createMemoryHistory, createRouter } from "vue-router"
-import { defineComponent } from "vue"
+import { mount } from "@vue/test-utils";
+import { createMemoryHistory, createRouter } from "vue-router";
+import { defineComponent } from "vue";
 
-import App from "@/app.vue"
+import App from "@/app.vue";
 
-const StubPage = defineComponent({ template: "<div>stub</div>" })
+const StubPage = defineComponent({ template: "<div>stub</div>" });
 
 describe("App", () => {
     it("renders the app shell with navigation", async () => {
@@ -16,20 +16,20 @@ describe("App", () => {
                 { path: "/benchmark", component: StubPage },
                 { path: "/about", component: StubPage },
             ],
-        })
+        });
 
-        router.push("/")
-        await router.isReady()
+        router.push("/");
+        await router.isReady();
 
         const wrapper = mount(App, {
             global: {
                 plugins: [router],
                 stubs: { VueQueryDevtools: true },
             },
-        })
+        });
 
-        expect(wrapper.text()).toContain("Vue Playground")
+        expect(wrapper.text()).toContain("Vue Playground");
 
-        wrapper.unmount()
-    })
-})
+        wrapper.unmount();
+    });
+});

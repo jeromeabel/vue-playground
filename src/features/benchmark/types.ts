@@ -1,18 +1,18 @@
-import type { GbifSpeciesSummary } from "@/features/species/types"
+import type { GbifSpeciesSummary } from "@/features/species/types";
 
-export type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number }
+export type BenchmarkedSpecies = GbifSpeciesSummary & { benchmarkOrder: number };
 
 export interface BenchmarkThreshold {
-    good: number
-    poor: number
-    unit: string
+    good: number;
+    poor: number;
+    unit: string;
 }
 
 export interface BenchmarkResults {
-    version: number
-    generatedAt: string
-    config: { iterations: number; aggregation: string; preset: string }
-    thresholds: Record<string, BenchmarkThreshold>
-    approaches: Record<string, Record<string, number>>
-    metrics: string[]
+    version: number;
+    generatedAt: string;
+    config: { iterations: number; aggregation: string; preset: string };
+    thresholds: Record<string, BenchmarkThreshold>;
+    approaches: Record<string, Record<string, number>>;
+    metrics: string[];
 }

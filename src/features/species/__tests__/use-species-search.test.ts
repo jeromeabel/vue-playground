@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
-import { ref } from "vue"
+import { describe, expect, it, vi } from "vitest";
+import { ref } from "vue";
 
-import { useSpeciesSearch } from "../composables/use-species-search"
+import { useSpeciesSearch } from "../composables/use-species-search";
 
 // Mock the API module
 vi.mock("../api", () => ({
@@ -12,7 +12,7 @@ vi.mock("../api", () => ({
         count: 1,
         results: [],
     }),
-}))
+}));
 
 // Mock TanStack Query to avoid needing a QueryClient
 vi.mock("@tanstack/vue-query", () => ({
@@ -25,20 +25,21 @@ vi.mock("@tanstack/vue-query", () => ({
         _queryKey: queryKey,
     })),
     keepPreviousData: Symbol("keepPreviousData"),
-}))
+}));
 
 describe("useSpeciesSearch", () => {
     it("returns a query object", () => {
-        const rawQuery = ref("")
-        const result = useSpeciesSearch(rawQuery)
-        expect(result).toHaveProperty("data")
-        expect(result).toHaveProperty("isPending")
-    })
+        const rawQuery = ref("");
+        const result = useSpeciesSearch(rawQuery);
+        expect(result).toHaveProperty("data");
+        expect(result).toHaveProperty("isPending");
+    });
 
     it("disables query when input is empty", () => {
-        const rawQuery = ref("")
-        const result = useSpeciesSearch(rawQuery) as any
+        const rawQuery = ref("");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = useSpeciesSearch(rawQuery) as any;
         // The enabled computed should resolve to false for empty input
-        expect(result._enabled.value).toBe(false)
-    })
-})
+        expect(result._enabled.value).toBe(false);
+    });
+});

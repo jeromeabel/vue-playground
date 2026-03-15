@@ -71,7 +71,7 @@ def extract_metrics(report: dict) -> dict:
         "SI":       round(audit_val("speed-index"), 1),
         "Max FID":  round(audit_val("max-potential-fid"), 1),
         "CLS":      round(audit_val("cumulative-layout-shift"), 4),
-        "DOM Size": round(audit_val("dom-size-insight")),
+        "DOM Size": round(audit_val("dom-size")),
         "MT Work":  round(audit_val("mainthread-work-breakdown"), 1),
     }
 

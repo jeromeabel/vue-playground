@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { GbifSpeciesSummary } from "../src/api/gbif";
+import type { GbifSpeciesSummary } from "../src/features/species/types";
 
 const BASE_URL = "https://api.gbif.org/v1";
 const LIMIT = 1000;

@@ -4,7 +4,9 @@
   "aggregation": "median",
   "lighthouse": {
     "preset": "desktop",
-    "chromeFlags": "--headless=new",
+    "chromeFlags": "--incognito",
+    "cpuSlowdownMultiplier": 4,
+    "onlyCategories": "performance",
     "networkProfile": "default (no throttling for desktop preset)"
   },
   "meaningfulMetrics": {
@@ -13,9 +15,11 @@
     "trace": ["fps", "longest_task_ms", "scripting_ms_per_s", "long_tasks_count"]
   },
   "notes": {
-    "iterations": "Run 5+ times and take the median to reduce variance",
-    "environment": "Close other tabs, disable extensions, use Incognito",
-    "networkProfile": "Desktop preset uses no throttling; for mobile simulation use --throttling-method=simulate",
-    "meaningfulMetrics": "TBT and DOM Size are the most discriminating for table rendering benchmarks; LCP and Score give the overall picture"
+    "preset": "desktop sets a 1350x940 viewport, no network throttling, and disables mobile emulation — use for table rendering benchmarks where layout matters",
+    "chromeFlags": "--incognito disables all Chrome extensions (analytics, ad-blockers, devtools panels) which would otherwise inflate scripting time and skew results",
+    "cpuSlowdownMultiplier": "4x CPU throttling simulates a mid-tier device on a developer machine; Lighthouse desktop preset defaults to 1x (no throttle) — explicitly setting 4x makes results consistent and blog-comparable across machines",
+    "onlyCategories": "performance skips accessibility, best-practices, and SEO audits — cuts run time ~60% and avoids false failures from benchmark pages that intentionally skip those concerns",
+    "iterations": "Run 5+ times and take the median to reduce variance from GC pauses and OS scheduling",
+    "networkProfile": "Desktop preset uses no throttling; for mobile simulation add --throttling-method=simulate"
   }
 }

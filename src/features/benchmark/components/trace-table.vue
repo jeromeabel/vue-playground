@@ -5,26 +5,31 @@ const props = defineProps<{
     results: BenchmarkResults;
 }>();
 
-const DISPLAY_METRICS = ["Score", "TBT", "DOM Size", "LCP"];
+const DISPLAY_METRICS = ["fps", "longest_task_ms", "scripting_ms_per_s", "long_tasks_count"];
 
 const displayMetrics = DISPLAY_METRICS.filter(m => props.results.metrics.includes(m));
 
 const approachNames = Object.keys(props.results.approaches);
 
-function getColorClass(metric: string, value: number | null): string {
-    if (value == null) return "text-text-muted";
+const METRIC_LABELS: Record<string, string> = {
+    fps: "FPS",
+    longest_task_ms: "Longest Task",
+    scripting_ms_per_s: "Scripting",
+    long_tasks_count: "Long Tasks (>50ms)",
+};
 
-    if (metric === "Score") {
-        if (value >= 90) return "text-green-600";
-        if (value >= 50) return "text-yellow-600";
-        return "text-red-600";
-    }
-
+function isHigherBetter(metric: string): boolean {
     const threshold = props.results.thresholds[metric];
-    if (!threshold) {
-        // No threshold — fall back to score logic (higher is better)
-        if (value >= 90) return "text-green-600";
-        if (value >= 50) return "text-yellow-600";
+    return threshold ? threshold.good > threshold.poor : false;
+}
+
+function getColorClass(metric: string, value: number): string {
+    const threshold = props.results.thresholds[metric];
+    if (!threshold) return "";
+
+    if (isHigherBetter(metric)) {
+        if (value >= threshold.good) return "text-green-600";
+        if (value >= threshold.poor) return "text-yellow-600";
         return "text-red-600";
     }
 
@@ -33,23 +38,20 @@ function getColorClass(metric: string, value: number | null): string {
     return "text-red-600";
 }
 
-function formatValue(metric: string, value: number | null): string {
-    if (value == null) return "N/A";
-    if (metric === "Score") {
-        return String(value);
-    }
-    if (metric === "DOM Size") {
-        return value.toLocaleString();
-    }
-    return value.toLocaleString() + " ms";
+function formatValue(metric: string, value: number): string {
+    const threshold = props.results.thresholds[metric];
+    const unit = threshold?.unit ?? "";
+    if (unit === "fps") return `${value} fps`;
+    if (unit === "ms/s") return `${value.toLocaleString()} ms/s`;
+    if (unit === "ms") return `${value.toLocaleString()} ms`;
+    return String(value);
 }
 
 function getThresholdDisplay(metric: string): string {
-    if (metric === "Score") return "> 90";
     const threshold = props.results.thresholds[metric];
     if (!threshold) return "—";
-    const formatted = threshold.good.toLocaleString();
-    return `< ${formatted} ${threshold.unit}`;
+    const sign = isHigherBetter(metric) ? ">" : "<";
+    return `${sign} ${threshold.good.toLocaleString()} ${threshold.unit}`;
 }
 </script>
 
@@ -80,7 +82,7 @@ function getThresholdDisplay(metric: string): string {
           :class="index < displayMetrics.length - 1 ? 'border-b border-surface-dark/50' : ''"
         >
           <td class="px-4 py-2.5 font-medium">
-            {{ metric }}
+            {{ METRIC_LABELS[metric] ?? metric }}
           </td>
           <td
             v-for="approach in approachNames"

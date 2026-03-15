@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/vue-query";
 import type { BenchmarkResults } from "../types";
 
-export function useBenchmarkResults() {
+export function useTraceResults() {
     return useQuery({
-        queryKey: ["benchmark-results"],
+        queryKey: ["trace-results"],
         queryFn: async (): Promise<BenchmarkResults> => {
-            const response = await fetch("/data/benchmark-results.json");
+            const response = await fetch("/data/trace-results.json");
             if (!response.ok) {
-                throw new Error(`Failed to load benchmark results: ${response.status}`);
+                throw new Error(`Failed to load trace results: ${response.status}`);
             }
             const contentType = response.headers.get("content-type") ?? "";
             if (!contentType.includes("json")) {
-                throw new Error("benchmark-results.json not found (got SPA fallback). Rebuild with pnpm build.");
+                throw new Error("trace-results.json not found (got SPA fallback). Rebuild with pnpm build.");
             }
             return response.json();
         },

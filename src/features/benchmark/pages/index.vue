@@ -1,8 +1,39 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import BenchmarkTable from "../components/benchmark-table.vue";
+import TraceTable from "../components/trace-table.vue";
 import { useBenchmarkResults } from "../composables/use-benchmark-results";
+import { useTraceResults } from "../composables/use-trace-results";
 
 const { data, isPending, isError } = useBenchmarkResults();
+const { data: traceData, isPending: traceIsPending, isError: traceIsError } = useTraceResults();
+
+function formatRunInfo(config: { iterations: number; aggregation: string }): string {
+    if (config.iterations > 1) return `${config.iterations} runs · ${config.aggregation}`;
+    return "single run";
+}
+
+const lighthouseSubtitle = computed(() => {
+    const preset = data.value?.config.preset ?? "desktop";
+    const runs = data.value ? formatRunInfo(data.value.config) : "";
+    return [
+        `Lighthouse ${preset} preset`,
+        runs,
+        "Chrome Incognito",
+        "10,000 species dataset",
+    ].filter(Boolean).join(" · ");
+});
+
+const traceSubtitle = computed(() => {
+    const runs = traceData.value ? formatRunInfo(traceData.value.config) : "";
+    return [
+        "Chrome DevTools Performance trace",
+        "CPU 4× slowdown",
+        "Incognito",
+        runs,
+        "10,000 species dataset",
+    ].filter(Boolean).join(" · ");
+});
 </script>
 
 <template>
@@ -54,7 +85,7 @@ const { data, isPending, isError } = useBenchmarkResults();
         Benchmark Results
       </h2>
       <p class="mb-4 text-sm text-text-muted">
-        Lighthouse desktop preset · 5 runs · median · Chrome Incognito · 10,000 species dataset
+        {{ lighthouseSubtitle }}
       </p>
 
       <template v-if="isPending">
@@ -72,6 +103,33 @@ const { data, isPending, isError } = useBenchmarkResults();
         <p class="mt-2 text-xs text-text-muted">
           Generated {{ new Date(data.generatedAt).toLocaleDateString() }}.
           Re-run <code class="rounded bg-surface-dark/30 px-1">pnpm lighthouse:all && pnpm analyze:lighthouse:json</code> to update.
+        </p>
+      </template>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="mb-1 text-xl font-bold">
+        Runtime Trace Results
+      </h2>
+      <p class="mb-4 text-sm text-text-muted">
+        {{ traceSubtitle }}
+      </p>
+
+      <template v-if="traceIsPending">
+        <p class="text-sm text-text-muted">
+          Loading trace results...
+        </p>
+      </template>
+      <template v-else-if="traceIsError">
+        <p class="text-sm text-text-muted">
+          No trace data found. Run <code class="rounded bg-surface-dark/30 px-1">pnpm analyze:trace:json</code> to generate results.
+        </p>
+      </template>
+      <template v-else-if="traceData">
+        <TraceTable :results="traceData" />
+        <p class="mt-2 text-xs text-text-muted">
+          Generated {{ new Date(traceData.generatedAt).toLocaleDateString() }}.
+          Re-run <code class="rounded bg-surface-dark/30 px-1">pnpm analyze:trace:json</code> to update.
         </p>
       </template>
     </section>

@@ -94,6 +94,64 @@ def _is_profiler_artifact(parent: dict, events: list) -> bool:
     return False
 
 
+def normalize_traces(
+    data: dict[str, dict],
+    tolerance_pct: float = 1.0,
+) -> tuple[dict[str, dict], float | None]:
+    """Normalize count/total metrics when trace durations differ.
+
+    Scales duration-dependent metrics to the shortest trace so that raw counts
+    (long_tasks_count, frames_committed) are comparable.  Rate metrics
+    (scripting_ms_per_s, fps, …) are mathematically unchanged by the scaling,
+    so they are left as-is.
+
+    Returns (normalised_data, reference_duration) — reference_duration is None
+    when all traces are within *tolerance_pct* of each other.
+    """
+    if len(data) < 2:
+        return data, None
+
+    durations = [d["duration_s"] for d in data.values()]
+    ref = min(durations)
+
+    if ref <= 0:
+        return data, None
+
+    max_diff = (max(durations) - ref) / ref * 100
+    if max_diff <= tolerance_pct:
+        return data, None
+
+    print(
+        f"Warning: trace durations differ by {max_diff:.1f}% "
+        f"(range: {min(durations):.2f}s – {max(durations):.2f}s). "
+        f"Normalizing counts and totals to {ref:.2f}s.",
+        file=sys.stderr,
+    )
+
+    SCALE_COUNTS = {"long_tasks_count", "frames_committed", "raf_count", "af_count"}
+    SCALE_TOTALS = {"scripting_ms", "rendering_ms", "painting_ms", "raf_total_ms"}
+
+    normalized = {}
+    for name, d in data.items():
+        nd = dict(d)
+        scale = ref / d["duration_s"]
+
+        nd["original_duration_s"] = d["duration_s"]
+        nd["duration_s"] = round(ref, 2)
+
+        for m in SCALE_COUNTS:
+            if m in nd:
+                nd[m] = round(nd[m] * scale)
+
+        for m in SCALE_TOTALS:
+            if m in nd:
+                nd[m] = round(nd[m] * scale, 1)
+
+        normalized[name] = nd
+
+    return normalized, ref
+
+
 def analyze_trace(trace_path: str) -> dict | None:
     """Analyze a single Chrome trace file. Returns None if not a valid trace."""
     with open(trace_path) as f:
@@ -331,10 +389,13 @@ def to_json(
     data: dict[str, dict],
     config: dict | None = None,
     metrics_filter: list[str] | None = None,
+    normalized_duration: float | None = None,
 ) -> dict:
     """Return a structured JSON envelope for the trace benchmark data."""
     if config is None:
         config = {"iterations": 1, "aggregation": "single", "preset": "desktop"}
+    if normalized_duration is not None:
+        config["normalizedToSeconds"] = round(normalized_duration, 2)
 
     thresholds = {
         metric: {"good": good, "poor": poor, "unit": unit}
@@ -455,9 +516,12 @@ def main():
         print("  Use analyze_lighthouse.py for Lighthouse JSON files.", file=sys.stderr)
         sys.exit(1)
 
+    # Normalize durations for fair comparison
+    data, normalized_duration = normalize_traces(data)
+
     # JSON mode
     if args.json or args.json_out:
-        result = to_json(data, metrics_filter=metrics_filter)
+        result = to_json(data, metrics_filter=metrics_filter, normalized_duration=normalized_duration)
         if args.json:
             print(json.dumps(result, indent=2))
         if args.json_out:

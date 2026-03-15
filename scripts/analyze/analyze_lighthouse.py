@@ -41,8 +41,10 @@ THRESHOLDS = {
 }
 
 
-def status_emoji(metric: str, value: float) -> str:
+def status_emoji(metric: str, value: float | None) -> str:
     """Return status emoji based on Core Web Vitals thresholds."""
+    if value is None:
+        return "ERR"
     t = THRESHOLDS.get(metric)
     if t is None:
         return ""
@@ -55,24 +57,45 @@ def status_emoji(metric: str, value: float) -> str:
 
 
 def extract_metrics(report: dict) -> dict:
-    """Extract all relevant metrics from a Lighthouse report."""
+    """Extract all relevant metrics from a Lighthouse report.
+
+    Handles both Lighthouse 12 (CLI) and 13 (DevTools) JSON formats.
+    Key differences:
+      - DOM Size: v12 uses "dom-size", v13 uses "dom-size-insight"
+      - NO_LCP: when LCP can't be detected (e.g. 80k DOM nodes blocking
+        the main thread), audits report errorMessage instead of numericValue
+    """
     audits = report.get("audits", {})
     perf_score = report.get("categories", {}).get("performance", {}).get("score")
 
-    def audit_val(key: str) -> float:
-        return audits.get(key, {}).get("numericValue", 0)
+    def audit_val(key: str) -> float | None:
+        audit = audits.get(key, {})
+        if audit.get("errorMessage"):
+            return None
+        return audit.get("numericValue")
+
+    def dom_size_val() -> float:
+        """Try v12 'dom-size' first, fall back to v13 'dom-size-insight'."""
+        for key in ("dom-size", "dom-size-insight"):
+            val = audits.get(key, {}).get("numericValue")
+            if val is not None:
+                return val
+        return 0
+
+    def safe_round(val: float | None, ndigits: int = 0) -> float | None:
+        return round(val, ndigits) if val is not None else None
 
     return {
         "Score":    round(perf_score * 100) if perf_score is not None else None,
-        "FCP":      round(audit_val("first-contentful-paint"), 1),
-        "LCP":      round(audit_val("largest-contentful-paint"), 1),
-        "TBT":      round(audit_val("total-blocking-time"), 1),
-        "TTI":      round(audit_val("interactive"), 1),
-        "SI":       round(audit_val("speed-index"), 1),
-        "Max FID":  round(audit_val("max-potential-fid"), 1),
-        "CLS":      round(audit_val("cumulative-layout-shift"), 4),
-        "DOM Size": round(audit_val("dom-size")),
-        "MT Work":  round(audit_val("mainthread-work-breakdown"), 1),
+        "FCP":      safe_round(audit_val("first-contentful-paint"), 1),
+        "LCP":      safe_round(audit_val("largest-contentful-paint"), 1),
+        "TBT":      safe_round(audit_val("total-blocking-time"), 1),
+        "TTI":      safe_round(audit_val("interactive"), 1),
+        "SI":       safe_round(audit_val("speed-index"), 1),
+        "Max FID":  safe_round(audit_val("max-potential-fid"), 1),
+        "CLS":      safe_round(audit_val("cumulative-layout-shift"), 4),
+        "DOM Size": round(dom_size_val()),
+        "MT Work":  safe_round(audit_val("mainthread-work-breakdown"), 1),
     }
 
 
@@ -88,10 +111,12 @@ def score_emoji(score: float | None) -> str:
 
 # -- Markdown output ---------------------------------------------------------
 
-def format_value(metric: str, value: float) -> str:
+def format_value(metric: str, value: float | None) -> str:
     """Format a metric value with appropriate units."""
+    if value is None:
+        return "N/A"
     if metric == "Score":
-        return f"{value:.0f}/100" if value is not None else "N/A"
+        return f"{value:.0f}/100"
     if metric == "CLS":
         return f"{value:.4f}"
     if metric == "DOM Size":
@@ -159,7 +184,13 @@ def _generate_insights(data: dict[str, dict], names: list[str]) -> list[str]:
 
     # Find best/worst for key metrics
     for metric, label in [("TBT", "Total Blocking Time"), ("LCP", "Largest Contentful Paint"), ("DOM Size", "DOM Size")]:
-        values = {n: data[n][metric] for n in names}
+        values = {n: data[n][metric] for n in names if data[n][metric] is not None}
+        if len(values) < 2:
+            # Flag approaches that couldn't be measured
+            unmeasured = [n for n in names if data[n][metric] is None]
+            if unmeasured:
+                insights.append(f"**{label}**: {', '.join(unmeasured)} could not be measured (NO_LCP)")
+            continue
         best = min(values, key=values.get)
         worst = max(values, key=values.get)
         if values[worst] > 0 and values[best] > 0:
@@ -170,9 +201,9 @@ def _generate_insights(data: dict[str, dict], names: list[str]) -> list[str]:
                     f"({values[worst]:,.0f} vs {values[best]:,.0f})"
                 )
 
-    # Flag any FAIL metrics
+    # Flag any FAIL or ERR metrics
     for name in names:
-        fails = [m for m in THRESHOLDS if status_emoji(m, data[name][m]) == "FAIL"]
+        fails = [m for m in THRESHOLDS if status_emoji(m, data[name][m]) in ("FAIL", "ERR")]
         if fails:
             insights.append(f"**{name}** fails on: {', '.join(fails)}")
 
@@ -246,33 +277,41 @@ def save_chart(data: dict[str, dict], output_path: str) -> None:
 
     for i, (metric_key, chart_label) in enumerate(CHART_METRICS):
         ax = flat_axes[i]
-        values = [data[n][metric_key] for n in names]
+        raw_values = [data[n][metric_key] for n in names]
+        # Replace None with 0 for charting; mark as unmeasurable
+        values = [v if v is not None else 0 for v in raw_values]
 
         bar_colors = []
-        for v in values:
-            status = status_emoji(metric_key, v)
-            if status == "pass":
-                bar_colors.append("#4caf50")
-            elif status == "warn":
-                bar_colors.append("#ff9800")
-            elif status == "FAIL":
-                bar_colors.append("#f44336")
+        for v, raw in zip(values, raw_values):
+            if raw is None:
+                bar_colors.append("#9e9e9e")  # grey for unmeasurable
             else:
-                bar_colors.append(colors[0])
+                status = status_emoji(metric_key, v)
+                if status == "pass":
+                    bar_colors.append("#4caf50")
+                elif status == "warn":
+                    bar_colors.append("#ff9800")
+                elif status == "FAIL":
+                    bar_colors.append("#f44336")
+                else:
+                    bar_colors.append(colors[0])
 
         ax.bar(names, values, color=bar_colors)
         ax.set_title(chart_label, fontsize=11, fontweight="bold")
         ax.tick_params(axis="x", rotation=15)
-        for j, v in enumerate(values):
-            ax.text(j, v, f"{v:,.0f}", ha="center", va="bottom", fontsize=9)
+        for j, (v, raw) in enumerate(zip(values, raw_values)):
+            label = "N/A" if raw is None else f"{v:,.0f}"
+            ax.text(j, v, label, ha="center", va="bottom", fontsize=9)
 
         # Draw threshold lines
         t = THRESHOLDS.get(metric_key)
-        if t and max(values) > 0:
+        measurable = [v for v in values if v > 0]
+        if t and measurable:
             good, needs, _ = t
-            if good < max(values) * 1.5:
+            max_val = max(measurable)
+            if good < max_val * 1.5:
                 ax.axhline(y=good, color="#4caf50", linestyle="--", alpha=0.5, linewidth=1)
-            if needs < max(values) * 1.5:
+            if needs < max_val * 1.5:
                 ax.axhline(y=needs, color="#f44336", linestyle="--", alpha=0.5, linewidth=1)
 
     plt.suptitle("Lighthouse Benchmark Comparison", fontsize=14, fontweight="bold")

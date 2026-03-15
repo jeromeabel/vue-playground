@@ -2,6 +2,7 @@
 import { ref } from "vue";
 
 import SpeciesCard from "../components/species-card.vue";
+import SpeciesCardSkeleton from "../components/species-card-skeleton.vue";
 import { useSpeciesList } from "../composables/use-species-list";
 
 const page = ref(0);
@@ -16,9 +17,12 @@ const { data, isPending, isError, error, refetch, totalPages, prefetchNext } = u
 
     <div
       v-if="isPending"
-      class="text-text-muted"
+      class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
     >
-      Loading species...
+      <SpeciesCardSkeleton
+        v-for="i in 8"
+        :key="i"
+      />
     </div>
 
     <div

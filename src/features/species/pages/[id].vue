@@ -5,6 +5,7 @@ import { useRoute } from "vue-router";
 import { useSpeciesDetail } from "../composables/use-species-detail";
 import { useSpeciesMedia } from "../composables/use-species-media";
 import { useVernacularNames } from "../composables/use-vernacular-names";
+import SpeciesDetailSkeleton from "../components/species-detail-skeleton.vue";
 
 const route = useRoute();
 const id = computed(() => Number(route.params.id));
@@ -29,12 +30,7 @@ const firstImage = computed(() => media.value?.results.find(item => item.type ==
       &larr; Back to list
     </RouterLink>
 
-    <div
-      v-if="isPending"
-      class="text-text-muted"
-    >
-      Loading species...
-    </div>
+    <SpeciesDetailSkeleton v-if="isPending" />
 
     <div
       v-else-if="isError"

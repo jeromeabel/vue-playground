@@ -1,6 +1,11 @@
 import json
-import pytest
 from pathlib import Path
+
+import pytest
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: marks tests that load large trace files (deselect with -m 'not slow')")
 
 SAMPLE_DIR = Path(__file__).resolve().parents[3] / ".docs" / "resources" / "epic-performance" / "sc-63108-call-details-performance"
 

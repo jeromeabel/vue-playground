@@ -15,10 +15,21 @@ import argparse
 import json
 import sys
 from collections import Counter, defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+
+# -- Thresholds for key trace metrics ----------------------------------------
+# Higher is better for fps; lower is better for everything else.
+TRACE_THRESHOLDS = {
+    "longest_task_ms":    (50,  200, "ms"),
+    "fps":                (55,  30,  "fps"),
+    "long_tasks_count":   (3,   10,  "count"),
+    "scripting_ms_per_s": (200, 500, "ms/s"),
+}
 
 
 # -- Category mapping (matches Chrome DevTools Summary panel) ----------------
@@ -310,6 +321,41 @@ def _generate_trace_insights(data: dict[str, dict], names: list[str]) -> list[st
     return insights
 
 
+# -- JSON output -------------------------------------------------------------
+
+def to_json(
+    data: dict[str, dict],
+    config: dict | None = None,
+    metrics_filter: list[str] | None = None,
+) -> dict:
+    """Return a structured JSON envelope for the trace benchmark data."""
+    if config is None:
+        config = {"iterations": 1, "aggregation": "single", "preset": "desktop"}
+
+    thresholds = {
+        metric: {"good": good, "poor": poor, "unit": unit}
+        for metric, (good, poor, unit) in TRACE_THRESHOLDS.items()
+    }
+
+    approaches = {}
+    for name, metrics in data.items():
+        if metrics_filter is not None:
+            approaches[name] = {k: v for k, v in metrics.items() if k in metrics_filter}
+        else:
+            approaches[name] = dict(metrics)
+
+    metric_keys = list(next(iter(approaches.values())).keys()) if approaches else []
+
+    return {
+        "version": 1,
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "config": config,
+        "thresholds": thresholds,
+        "approaches": approaches,
+        "metrics": metric_keys,
+    }
+
+
 # -- Chart output -------------------------------------------------------------
 
 def save_chart(data: dict[str, dict], output_path: str) -> None:
@@ -361,16 +407,35 @@ def main():
                         help="Output PNG path (default: trace-comparison.png)")
     parser.add_argument("--no-chart", action="store_true",
                         help="Skip chart generation, only print markdown")
+    parser.add_argument("--json", action="store_true",
+                        help="Output JSON to stdout (replaces markdown)")
+    parser.add_argument("--json-out", metavar="PATH",
+                        help="Write JSON output to file")
+    parser.add_argument("--metrics", metavar="M1,M2,...",
+                        help="Filter which metrics to include (comma-separated)")
+    parser.add_argument("--names", metavar="N1,N2,...",
+                        help="Custom labels for approaches (comma-separated, must match number of traces)")
     args = parser.parse_args()
+
+    # Parse optional filters
+    metrics_filter = [m.strip() for m in args.metrics.split(",")] if args.metrics else None
+    custom_names = [n.strip() for n in args.names.split(",")] if args.names else None
+
+    if custom_names is not None and len(custom_names) != len(args.traces):
+        print(
+            f"Error: --names has {len(custom_names)} value(s) but {len(args.traces)} trace(s) were provided",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     data = {}
     skipped = []
-    for path_str in args.traces:
+    for i, path_str in enumerate(args.traces):
         path = Path(path_str)
         if not path.exists():
             print(f"Error: {path_str} not found", file=sys.stderr)
             sys.exit(1)
-        name = path.stem
+        name = custom_names[i] if custom_names is not None else path.stem
         result = analyze_trace(path_str)
         if result is None:
             skipped.append(path_str)
@@ -385,6 +450,17 @@ def main():
         print("Error: no valid Chrome traces found. Are these Lighthouse reports instead?", file=sys.stderr)
         print("  Use analyze_lighthouse.py for Lighthouse JSON files.", file=sys.stderr)
         sys.exit(1)
+
+    # JSON mode
+    if args.json or args.json_out:
+        result = to_json(data, metrics_filter=metrics_filter)
+        if args.json:
+            print(json.dumps(result, indent=2))
+        if args.json_out:
+            with open(args.json_out, "w") as f:
+                json.dump(result, f, indent=2)
+            print(f"JSON saved to {args.json_out}", file=sys.stderr)
+        return
 
     # Markdown to stdout
     print_markdown(data)

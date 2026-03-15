@@ -15,6 +15,7 @@ Each JSON is a Lighthouse report exported via:
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -184,6 +185,41 @@ def _generate_insights(data: dict[str, dict], names: list[str]) -> list[str]:
     return insights
 
 
+# -- JSON output -------------------------------------------------------------
+
+def to_json(
+    data: dict[str, dict],
+    config: dict | None = None,
+    metrics_filter: list[str] | None = None,
+) -> dict:
+    """Return a structured JSON envelope for the benchmark data."""
+    if config is None:
+        config = {"iterations": 1, "aggregation": "single", "preset": "desktop"}
+
+    thresholds = {
+        metric: {"good": good, "poor": poor, "unit": unit}
+        for metric, (good, poor, unit) in THRESHOLDS.items()
+    }
+
+    approaches = {}
+    for name, metrics in data.items():
+        if metrics_filter is not None:
+            approaches[name] = {k: v for k, v in metrics.items() if k in metrics_filter}
+        else:
+            approaches[name] = dict(metrics)
+
+    metric_keys = list(next(iter(approaches.values())).keys()) if approaches else []
+
+    return {
+        "version": 1,
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "config": config,
+        "thresholds": thresholds,
+        "approaches": approaches,
+        "metrics": metric_keys,
+    }
+
+
 # -- Chart output -------------------------------------------------------------
 
 CHART_METRICS = [
@@ -251,22 +287,52 @@ def main():
                         help="Output PNG path (default: lighthouse-comparison.png)")
     parser.add_argument("--no-chart", action="store_true",
                         help="Skip chart generation, only print markdown")
+    parser.add_argument("--json", action="store_true",
+                        help="Output JSON to stdout (replaces markdown)")
+    parser.add_argument("--json-out", metavar="PATH",
+                        help="Write JSON output to file")
+    parser.add_argument("--metrics", metavar="M1,M2,...",
+                        help="Filter which metrics to include (comma-separated)")
+    parser.add_argument("--names", metavar="N1,N2,...",
+                        help="Custom labels for approaches (comma-separated, must match number of reports)")
     args = parser.parse_args()
+
+    # Parse optional filters
+    metrics_filter = [m.strip() for m in args.metrics.split(",")] if args.metrics else None
+    custom_names = [n.strip() for n in args.names.split(",")] if args.names else None
+
+    if custom_names is not None and len(custom_names) != len(args.reports):
+        print(
+            f"Error: --names has {len(custom_names)} value(s) but {len(args.reports)} report(s) were provided",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     # Load reports
     data = {}
-    for path_str in args.reports:
+    for i, path_str in enumerate(args.reports):
         path = Path(path_str)
         if not path.exists():
             print(f"Error: {path_str} not found", file=sys.stderr)
             sys.exit(1)
-        name = path.stem
+        name = custom_names[i] if custom_names is not None else path.stem
         with open(path) as f:
             report = json.load(f)
         if "audits" not in report:
             print(f"Error: {path_str} does not look like a Lighthouse report (no 'audits' key)", file=sys.stderr)
             sys.exit(1)
         data[name] = extract_metrics(report)
+
+    # JSON mode
+    if args.json or args.json_out:
+        result = to_json(data, metrics_filter=metrics_filter)
+        if args.json:
+            print(json.dumps(result, indent=2))
+        if args.json_out:
+            with open(args.json_out, "w") as f:
+                json.dump(result, f, indent=2)
+            print(f"JSON saved to {args.json_out}", file=sys.stderr)
+        return
 
     # Markdown to stdout
     print_markdown(data)

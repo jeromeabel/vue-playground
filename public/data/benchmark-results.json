@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-03-16T19:10:43.160066+00:00",
+  "generatedAt": "2026-03-16T20:47:51.555713+00:00",
   "config": {
     "preset": "desktop",
     "chromeFlags": "--incognito",
@@ -55,13 +55,13 @@
   "approaches": {
     "Basic Table": {
       "Score": 100,
-      "FCP": 508.9,
-      "LCP": 508.9,
-      "TBT": 0,
-      "TTI": 508.9,
-      "SI": 508.9,
-      "DOM Size": 80038,
-      "MT Work": 1956.2
+      "FCP": 511.3,
+      "LCP": 511.3,
+      "TBT": 3.0,
+      "TTI": 550.8,
+      "SI": 511.3,
+      "DOM Size": 40,
+      "MT Work": 7755.3
     },
     "PrimeVue DataTable": {
       "Score": 99,

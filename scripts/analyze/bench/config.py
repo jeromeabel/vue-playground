@@ -26,7 +26,7 @@ _DEFAULTS = {
         "chromeFlags": "--incognito",
         "cpuSlowdownMultiplier": 4,
         "onlyCategories": "performance",
-        "iterations": 1,
+        "iterations": 3,
         "aggregation": "single",
     },
     "display": DEFAULT_DISPLAY,

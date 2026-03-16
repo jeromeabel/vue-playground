@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bench"
+version = "0.1.0"
+description = "Benchmark analysis tools for vue-playground"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+bench = "bench.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["bench"]
+markers = ["slow: requires real report/trace files in inputs/"]

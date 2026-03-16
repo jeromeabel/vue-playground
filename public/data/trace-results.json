@@ -1,11 +1,13 @@
 {
   "version": 1,
-  "generatedAt": "2026-03-15T17:14:32.398086+00:00",
+  "generatedAt": "2026-03-16T19:10:47.663366+00:00",
   "config": {
-    "iterations": 1,
-    "aggregation": "single",
     "preset": "desktop",
-    "normalizedToSeconds": 5.28
+    "chromeFlags": "--incognito",
+    "cpuSlowdownMultiplier": 4,
+    "onlyCategories": "performance",
+    "iterations": 5,
+    "aggregation": "median"
   },
   "thresholds": {
     "longest_task_ms": {
@@ -16,7 +18,8 @@
     "fps": {
       "good": 55,
       "poor": 30,
-      "unit": "fps"
+      "unit": "fps",
+      "higher_is_better": true
     },
     "long_tasks_count": {
       "good": 3,
@@ -30,90 +33,45 @@
     }
   },
   "approaches": {
-    "Basic": {
-      "duration_s": 5.28,
-      "scripting_ms": 570.9,
-      "rendering_ms": 65.5,
-      "painting_ms": 7.3,
+    "Basic Table": {
       "scripting_ms_per_s": 108.1,
       "rendering_ms_per_s": 12.4,
       "painting_ms_per_s": 1.4,
       "long_tasks_count": 2,
-      "long_tasks_per_s": 0.37,
       "longest_task_ms": 139.3,
-      "top_long_tasks_ms": [
-        139.3,
-        103.0
-      ],
-      "frames_committed": 4,
       "fps": 0.7,
-      "original_duration_s": 5.39
+      "raf_count": 0,
+      "raf_total_ms": null
     },
-    "PrimeVue": {
-      "duration_s": 5.28,
-      "scripting_ms": 3339.3,
-      "rendering_ms": 113.4,
-      "painting_ms": 22.6,
+    "PrimeVue DataTable": {
       "scripting_ms_per_s": 632.5,
       "rendering_ms_per_s": 21.5,
       "painting_ms_per_s": 4.3,
       "long_tasks_count": 9,
-      "long_tasks_per_s": 1.64,
       "longest_task_ms": 1016.6,
-      "top_long_tasks_ms": [
-        1016.6,
-        379.2,
-        277.6,
-        118.4,
-        116.5
-      ],
-      "frames_committed": 183,
       "fps": 34.7,
       "raf_count": 180,
-      "raf_total_ms": 678.2,
-      "raf_mean_ms": 3.78,
-      "original_duration_s": 5.5
+      "raf_total_ms": 678.2
     },
-    "TanStack": {
-      "duration_s": 5.28,
-      "scripting_ms": 643.5,
-      "rendering_ms": 99.5,
-      "painting_ms": 22.5,
+    "TanStack Table": {
       "scripting_ms_per_s": 121.8,
       "rendering_ms_per_s": 18.8,
       "painting_ms_per_s": 4.3,
       "long_tasks_count": 5,
-      "long_tasks_per_s": 0.95,
       "longest_task_ms": 323.0,
-      "top_long_tasks_ms": [
-        323.0,
-        128.0,
-        95.4,
-        90.0,
-        65.7
-      ],
-      "frames_committed": 268,
       "fps": 50.7,
       "raf_count": 264,
-      "raf_total_ms": 61.4,
-      "raf_mean_ms": 0.23,
-      "original_duration_s": 5.28
+      "raf_total_ms": 61.4
     }
   },
   "metrics": [
-    "duration_s",
-    "scripting_ms",
-    "rendering_ms",
-    "painting_ms",
     "scripting_ms_per_s",
+    "longest_task_ms",
+    "long_tasks_count",
+    "fps",
     "rendering_ms_per_s",
     "painting_ms_per_s",
-    "long_tasks_count",
-    "long_tasks_per_s",
-    "longest_task_ms",
-    "top_long_tasks_ms",
-    "frames_committed",
-    "fps",
-    "original_duration_s"
+    "raf_count",
+    "raf_total_ms"
   ]
 }

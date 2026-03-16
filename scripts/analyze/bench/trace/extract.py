@@ -4,7 +4,7 @@ from collections import Counter, defaultdict
 
 THRESHOLDS = {
     "longest_task_ms": {"good": 50, "poor": 200, "unit": "ms"},
-    "fps": {"good": 55, "poor": 30, "unit": "fps"},
+    "fps": {"good": 55, "poor": 30, "unit": "fps", "higher_is_better": True},
     "long_tasks_count": {"good": 3, "poor": 10, "unit": "count"},
     "scripting_ms_per_s": {"good": 200, "poor": 500, "unit": "ms/s"},
 }

@@ -125,11 +125,11 @@ def normalize_traces(
         nd["duration_s"] = round(ref, 2)
 
         for m in SCALE_COUNTS:
-            if m in nd:
+            if m in nd and nd[m] is not None:
                 nd[m] = round(nd[m] * scale)
 
         for m in SCALE_TOTALS:
-            if m in nd:
+            if m in nd and nd[m] is not None:
                 nd[m] = round(nd[m] * scale, 1)
 
         normalized[name] = nd

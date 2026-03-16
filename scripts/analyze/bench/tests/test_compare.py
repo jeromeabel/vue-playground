@@ -45,6 +45,16 @@ class TestNormalizeTraces:
         result, _ = normalize_traces(data)
         assert result["b"]["fps"] == 40.0
 
+    def test_preserves_null_optional_totals(self):
+        data = {
+            "a": {"duration_s": 5.0, "scripting_ms": 500, "rendering_ms": 100, "painting_ms": 50, "raf_total_ms": None},
+            "b": {"duration_s": 10.0, "scripting_ms": 1000, "rendering_ms": 200, "painting_ms": 100, "raf_total_ms": None},
+        }
+        result, ref = normalize_traces(data)
+        assert ref == 5.0
+        assert result["a"]["raf_total_ms"] is None
+        assert result["b"]["raf_total_ms"] is None
+
 
 class TestFpsComparable:
     def test_all_interactive(self):

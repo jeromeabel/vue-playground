@@ -1,12 +1,21 @@
 {
   "version": 1,
-  "generatedAt": "2026-03-15T19:33:29.269165+00:00",
+  "generatedAt": "2026-03-16T19:10:43.160066+00:00",
   "config": {
-    "iterations": 1,
-    "aggregation": "single",
-    "preset": "desktop"
+    "preset": "desktop",
+    "chromeFlags": "--incognito",
+    "cpuSlowdownMultiplier": 4,
+    "onlyCategories": "performance",
+    "iterations": 5,
+    "aggregation": "median"
   },
   "thresholds": {
+    "Score": {
+      "good": 90,
+      "poor": 50,
+      "unit": "points",
+      "higher_is_better": true
+    },
     "FCP": {
       "good": 1800,
       "poor": 3000,
@@ -32,16 +41,6 @@
       "poor": 5800,
       "unit": "ms"
     },
-    "Max FID": {
-      "good": 100,
-      "poor": 300,
-      "unit": "ms"
-    },
-    "CLS": {
-      "good": 0.1,
-      "poor": 0.25,
-      "unit": ""
-    },
     "DOM Size": {
       "good": 1500,
       "poor": 3000,
@@ -54,53 +53,45 @@
     }
   },
   "approaches": {
-    "Basic": {
-      "Score": null,
-      "FCP": 475.6,
-      "LCP": null,
-      "TBT": null,
-      "TTI": null,
-      "SI": 475.6,
-      "Max FID": 16,
-      "CLS": 0,
-      "DOM Size": 40,
-      "MT Work": 2144.3
-    },
-    "PrimeVue": {
-      "Score": 98,
-      "FCP": 499.8,
-      "LCP": 957.3,
-      "TBT": 65,
-      "TTI": 957.3,
-      "SI": 499.8,
-      "Max FID": 115,
-      "CLS": 0.0217,
-      "DOM Size": 497,
-      "MT Work": 643.0
-    },
-    "TanStack": {
+    "Basic Table": {
       "Score": 100,
-      "FCP": 506.6,
-      "LCP": 748.0,
+      "FCP": 508.9,
+      "LCP": 508.9,
       "TBT": 0,
-      "TTI": 748.0,
-      "SI": 506.6,
-      "Max FID": 16,
-      "CLS": 0.0016,
-      "DOM Size": 329,
-      "MT Work": 318.8
+      "TTI": 508.9,
+      "SI": 508.9,
+      "DOM Size": 80038,
+      "MT Work": 1956.2
+    },
+    "PrimeVue DataTable": {
+      "Score": 99,
+      "FCP": 600.0,
+      "LCP": 601.7,
+      "TBT": 73,
+      "TTI": 766.5,
+      "SI": 600.0,
+      "DOM Size": 495,
+      "MT Work": 620.4
+    },
+    "TanStack Table": {
+      "Score": 99,
+      "FCP": 649.5,
+      "LCP": 831.1,
+      "TBT": 0,
+      "TTI": 831.1,
+      "SI": 649.5,
+      "DOM Size": 327,
+      "MT Work": 274.7
     }
   },
   "metrics": [
     "Score",
-    "FCP",
-    "LCP",
     "TBT",
-    "TTI",
-    "SI",
-    "Max FID",
-    "CLS",
+    "LCP",
     "DOM Size",
+    "FCP",
+    "SI",
+    "TTI",
     "MT Work"
   ]
 }

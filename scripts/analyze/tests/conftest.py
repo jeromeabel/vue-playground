@@ -7,7 +7,7 @@ import pytest
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: marks tests that load large trace files (deselect with -m 'not slow')")
 
-REPORTS_DIR = Path(__file__).resolve().parents[1] / "reports"
+REPORTS_DIR = Path(__file__).resolve().parents[1] / "inputs" / "lighthouse"
 
 @pytest.fixture
 def lighthouse_basic():

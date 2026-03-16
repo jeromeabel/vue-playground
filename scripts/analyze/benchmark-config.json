@@ -1,27 +1,27 @@
 {
-  "$comment": "Recommended settings for reproducible benchmarks",
-  "iterations": 5,
-  "aggregation": "median",
-  "lighthouse": {
+  "capture": {
     "preset": "desktop",
     "chromeFlags": "--incognito",
     "cpuSlowdownMultiplier": 4,
     "onlyCategories": "performance",
-    "networkProfile": "default (no throttling for desktop preset)"
+    "iterations": 5,
+    "aggregation": "median"
   },
-  "meaningfulMetrics": {
-    "primary": ["Score", "TBT", "LCP", "DOM Size"],
-    "secondary": ["FCP", "SI", "TTI", "CLS"],
-    "trace": ["fps", "longest_task_ms", "scripting_ms_per_s", "long_tasks_count"]
+  "display": {
+    "lighthouse": {
+      "primary": ["Score", "TBT", "LCP", "DOM Size"],
+      "secondary": ["FCP", "SI", "TTI", "MT Work"],
+      "hidden": ["Max FID", "CLS"]
+    },
+    "trace": {
+      "primary": ["scripting_ms_per_s", "longest_task_ms", "long_tasks_count", "fps"],
+      "secondary": ["rendering_ms_per_s", "painting_ms_per_s", "raf_count", "raf_total_ms"],
+      "hidden": ["af_count", "af_mean_ms", "af_p95_ms", "af_max_ms"]
+    }
   },
-  "notes": {
-    "preset": "desktop sets a 1350x940 viewport, no network throttling, and disables mobile emulation — use for table rendering benchmarks where layout matters",
-    "chromeFlags": "--incognito disables all Chrome extensions (analytics, ad-blockers, devtools panels) which would otherwise inflate scripting time and skew results",
-    "cpuSlowdownMultiplier": "4x CPU throttling simulates a mid-tier device (see https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md); desktop preset defaults to 1x — 4x is closer to real user hardware for call-center laptops",
-    "onlyCategories": "performance skips accessibility, best-practices, and SEO audits — cuts run time ~60% and avoids false failures from benchmark pages that intentionally skip those concerns",
-    "iterations": "Run 5+ times and take the median to reduce variance from GC pauses and OS scheduling",
-    "networkProfile": "Desktop preset uses no throttling; for mobile simulation add --throttling-method=simulate",
-    "lighthouseVersion": "Use lighthouse@13 to match Chrome DevTools built-in version — v12 and v13 use different audit keys (dom-size vs dom-size-insight); analyze_lighthouse.py handles both",
-    "devtoolsExport": "For pages that crash CLI with PROTOCOL_TIMEOUT (basic-table with 4x throttling), export Lighthouse JSON from Chrome DevTools panel and feed to analyze_lighthouse.py directly"
+  "approaches": {
+    "basic": { "label": "Basic Table" },
+    "primevue": { "label": "PrimeVue DataTable" },
+    "tanstack": { "label": "TanStack Table" }
   }
 }

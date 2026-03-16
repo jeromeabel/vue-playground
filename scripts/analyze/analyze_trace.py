@@ -223,6 +223,26 @@ def analyze_trace(trace_path: str) -> dict | None:
     commits = frame_events.get("Commit", frame_events.get("BeginMainThreadFrame", 0))
     fps = commits / duration_s if duration_s > 0 else 0
 
+    # Detect user interaction (scroll, pointer, keyboard — not page lifecycle)
+    INTERACTION_TYPES = {
+        "scroll", "scrollend", "wheel",
+        "mousedown", "mouseup", "click", "dblclick",
+        "pointerdown", "pointerup", "pointermove",
+        "keydown", "keyup", "keypress",
+        "touchstart", "touchmove", "touchend",
+    }
+    has_scroll = False
+    has_interaction = False
+    for e in events:
+        if (e.get("pid"), e.get("tid")) not in main_threads:
+            continue
+        if e.get("name") == "EventDispatch":
+            etype = e.get("args", {}).get("data", {}).get("type", "")
+            if etype in INTERACTION_TYPES:
+                has_interaction = True
+            if etype in ("scroll", "scrollend", "wheel"):
+                has_scroll = True
+
     # AnimationFrame stats
     af_durs = []
     for e in events:
@@ -244,6 +264,8 @@ def analyze_trace(trace_path: str) -> dict | None:
 
     result = {
         "duration_s": round(duration_s, 2),
+        "has_interaction": has_interaction,
+        "has_scroll": has_scroll,
         "scripting_ms": round(totals.get("Scripting", 0), 1),
         "rendering_ms": round(totals.get("Rendering", 0), 1),
         "painting_ms": round(totals.get("Painting", 0), 1),
@@ -284,8 +306,15 @@ def print_markdown(data: dict[str, dict]) -> None:
     for name in names:
         d = data[name]
         print(f"## {name}\n")
+        trace_type = "load + scroll" if d.get("has_scroll") else "load + interaction" if d.get("has_interaction") else "load only"
+        print(f"- **Trace type**: {trace_type}")
         print(f"- **Duration**: {d['duration_s']}s")
-        print(f"- **Frames committed**: {d['frames_committed']} ({d['fps']} fps)")
+        fps_note = ""
+        if not d.get("has_interaction") and d.get("raf_count", 0) > 0:
+            fps_note = " (rAF-driven, no user interaction)"
+        elif not d.get("has_interaction") and d.get("raf_count", 0) == 0:
+            fps_note = " (initial render only — no rAF, no interaction)"
+        print(f"- **Frames committed**: {d['frames_committed']} ({d['fps']} fps){fps_note}")
         print(f"- **Scripting**: {d['scripting_ms']} ms ({d['scripting_ms_per_s']} ms/s)")
         print(f"- **Rendering**: {d['rendering_ms']} ms ({d['rendering_ms_per_s']} ms/s)")
         print(f"- **Painting**: {d['painting_ms']} ms ({d['painting_ms_per_s']} ms/s)")
@@ -309,9 +338,23 @@ def print_markdown(data: dict[str, dict]) -> None:
         print(header)
         print(sep)
 
+        # Trace type row
+        type_cells = []
+        for n in names:
+            d = data[n]
+            if d.get("has_scroll"):
+                type_cells.append("load + scroll")
+            elif d.get("has_interaction"):
+                type_cells.append("load + interaction")
+            else:
+                type_cells.append("load only")
+        print(f"| Trace type | " + " | ".join(type_cells) + " |")
+
+        # Check if FPS is comparable across traces
+        fps_comparable = _fps_comparable(data, names)
+
         rows = [
             ("Duration (s)",       "duration_s"),
-            ("FPS",                "fps"),
             ("Scripting (ms/s)",   "scripting_ms_per_s"),
             ("Rendering (ms/s)",   "rendering_ms_per_s"),
             ("Painting (ms/s)",    "painting_ms_per_s"),
@@ -321,6 +364,34 @@ def print_markdown(data: dict[str, dict]) -> None:
         for label, key in rows:
             cells = [f"{data[n].get(key, 'N/A')}" for n in names]
             print(f"| {label} | " + " | ".join(cells) + " |")
+
+        # FPS row with annotation when not comparable
+        fps_cells = []
+        for n in names:
+            d = data[n]
+            val = f"{d['fps']}"
+            if not d.get("has_interaction") and d.get("raf_count", 0) > 0:
+                val += " (rAF)"
+            elif not d.get("has_interaction") and d.get("raf_count", 0) == 0:
+                val += " (no rAF)"
+            fps_cells.append(val)
+        fps_label = "FPS" if fps_comparable else "FPS *"
+        print(f"| {fps_label} | " + " | ".join(fps_cells) + " |")
+
+        # rAF row
+        raf_cells = []
+        for n in names:
+            d = data[n]
+            raf = d.get("raf_count", 0)
+            if raf > 0:
+                raf_cells.append(f"{raf} ({d.get('raf_total_ms', 0)} ms)")
+            else:
+                raf_cells.append("0")
+        print(f"| rAF callbacks | " + " | ".join(raf_cells) + " |")
+
+        if not fps_comparable:
+            print()
+            print("*\\* FPS not directly comparable — traces have different interaction patterns (see Trace type row).*")
 
         print()
 
@@ -333,19 +404,67 @@ def print_markdown(data: dict[str, dict]) -> None:
     print("\n---")
 
 
+def _fps_comparable(data: dict[str, dict], names: list[str]) -> bool:
+    """Check if FPS is comparable across traces.
+
+    FPS is only comparable when all traces have the same interaction pattern:
+    either all have user interaction, or all are load-only with similar rAF usage.
+    """
+    has_raf = [data[n].get("raf_count", 0) > 0 for n in names]
+    has_interaction = [data[n].get("has_interaction", False) for n in names]
+
+    # All same interaction type
+    if all(has_interaction) or not any(has_interaction):
+        # Within load-only, rAF vs no-rAF is also not comparable
+        if not any(has_interaction) and any(has_raf) and not all(has_raf):
+            return False
+        return True
+    return False
+
+
 def _generate_trace_insights(data: dict[str, dict], names: list[str]) -> list[str]:
     """Auto-generate insights from trace comparison."""
     insights = []
 
-    # FPS comparison
-    fps_vals = {n: data[n]["fps"] for n in names}
-    best_fps = max(fps_vals, key=fps_vals.get)
-    worst_fps = min(fps_vals, key=fps_vals.get)
-    if fps_vals[best_fps] > fps_vals[worst_fps] * 1.1:
-        insights.append(
-            f"**FPS**: {best_fps} achieves {fps_vals[best_fps]} fps vs "
-            f"{worst_fps} at {fps_vals[worst_fps]} fps"
-        )
+    fps_comparable = _fps_comparable(data, names)
+
+    # FPS comparison — only when traces are comparable
+    if fps_comparable:
+        fps_vals = {n: data[n]["fps"] for n in names}
+        best_fps = max(fps_vals, key=fps_vals.get)
+        worst_fps = min(fps_vals, key=fps_vals.get)
+        if fps_vals[best_fps] > fps_vals[worst_fps] * 1.1:
+            insights.append(
+                f"**FPS**: {best_fps} achieves {fps_vals[best_fps]} fps vs "
+                f"{worst_fps} at {fps_vals[worst_fps]} fps"
+            )
+    else:
+        # Explain why FPS isn't compared
+        raf_names = [n for n in names if data[n].get("raf_count", 0) > 0]
+        no_raf_names = [n for n in names if data[n].get("raf_count", 0) == 0]
+        if raf_names and no_raf_names:
+            insights.append(
+                f"**FPS not comparable**: {', '.join(raf_names)} use rAF "
+                f"({', '.join(str(data[n]['frames_committed']) + ' frames' for n in raf_names)}) "
+                f"while {', '.join(no_raf_names)} rendered only initial frames "
+                f"({', '.join(str(data[n]['frames_committed']) + ' frames' for n in no_raf_names)}). "
+                f"rAF-driven components commit frames during initialization even without user scrolling"
+            )
+
+    # rAF cost comparison (meaningful even in load-only traces)
+    raf_names = [n for n in names if data[n].get("raf_count", 0) > 0]
+    if len(raf_names) >= 2:
+        raf_totals = {n: data[n].get("raf_total_ms", 0) for n in raf_names}
+        heaviest = max(raf_totals, key=raf_totals.get)
+        lightest = min(raf_totals, key=raf_totals.get)
+        if raf_totals[lightest] > 0:
+            ratio = raf_totals[heaviest] / raf_totals[lightest]
+            if ratio > 2:
+                insights.append(
+                    f"**rAF cost**: {heaviest} spends {raf_totals[heaviest]:.0f}ms in rAF callbacks "
+                    f"vs {lightest} at {raf_totals[lightest]:.0f}ms "
+                    f"({ratio:.0f}x more) — reflects virtual scroll initialization overhead"
+                )
 
     # Scripting dominance
     for name in names:
@@ -367,10 +486,10 @@ def _generate_trace_insights(data: dict[str, dict], names: list[str]) -> list[st
                 f"{d['longest_task_ms'] / 50:.0f}x the long-task threshold — severe jank"
             )
 
-    # Per-frame render cost
+    # Per-frame render cost — only for traces with meaningful frame counts
     for name in names:
         d = data[name]
-        if d["frames_committed"] > 0:
+        if d["frames_committed"] > 10 and (d.get("has_interaction") or d.get("raf_count", 0) > 0):
             total_ms = d["scripting_ms"] + d["rendering_ms"] + d["painting_ms"]
             per_frame = total_ms / d["frames_committed"]
             budget = 16.67

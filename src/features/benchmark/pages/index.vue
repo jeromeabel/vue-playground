@@ -17,9 +17,10 @@ const lighthouseSubtitle = computed(() => {
     const preset = data.value?.config.preset ?? "desktop";
     const runs = data.value ? formatRunInfo(data.value.config) : "";
     return [
-        `Lighthouse ${preset} preset`,
+        `Lighthouse 13 ${preset} preset`,
+        "4× CPU throttling",
         runs,
-        "Chrome Incognito",
+        "DevTools panel export",
         "10,000 species dataset",
     ].filter(Boolean).join(" · ");
 });

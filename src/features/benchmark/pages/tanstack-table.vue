@@ -144,7 +144,10 @@ const rowByKey = computed(() => {
 function highlight(text: string): string {
     if (!query.value) return text;
     const q = query.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return text.replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+    return text.replace(
+        new RegExp(`(${q})`, "gi"),
+        "<mark class=\"rounded-[2px] bg-[oklch(94%_0.12_100)] px-px\">$1</mark>",
+    );
 }
 
 function escapeHtml(text: string): string {
@@ -217,7 +220,7 @@ onMounted(async () => {
     <div ref="tableContainer">
       <div
         ref="scrollContainer"
-        class="relative isolate max-h-150 overflow-auto rounded border border-surface-dark"
+        class="relative isolate h-150 overflow-auto rounded border border-surface-dark"
       >
         <table class="w-full table-fixed text-left text-sm">
           <colgroup>
@@ -297,11 +300,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-:deep(mark) {
-  background: oklch(94% 0.12 100);
-  border-radius: 2px;
-  padding: 0 1px;
-}
-</style>

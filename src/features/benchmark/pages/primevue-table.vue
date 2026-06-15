@@ -68,7 +68,10 @@ function matchedVernaculars(s: BenchmarkedSpecies) {
 function highlight(text: string): string {
     if (!query.value) return text;
     const q = query.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return text.replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+    return text.replace(
+        new RegExp(`(${q})`, "gi"),
+        "<mark class=\"rounded-[2px] bg-[oklch(94%_0.12_100)] px-px\">$1</mark>",
+    );
 }
 
 // Auto-expand rows whose vernacular names match the search
@@ -125,7 +128,7 @@ watch([filteredSpecies, query], () => {
 
     <div
       ref="tableContainer"
-      class="benchmark-primevue-table relative isolate overflow-hidden rounded border border-surface-dark"
+      class="overflow-hidden rounded border border-surface-dark"
     >
       <DataTable
         v-model:expanded-rows="expandedRows"
@@ -133,7 +136,7 @@ watch([filteredSpecies, query], () => {
         scrollable
         scroll-height="600px"
         :virtual-scroller-options="virtualScrollEnabled ? { itemSize: 40 } : undefined"
-        class="benchmark-table text-sm"
+        class="text-sm"
       >
         <Column
           expander
@@ -142,6 +145,7 @@ watch([filteredSpecies, query], () => {
         <Column
           field="benchmarkOrder"
           header="ID"
+          style="width: 72px"
         >
           <template #body="slotProps">
             <span class="font-mono text-text-muted">{{ slotProps.data.benchmarkOrder }}</span>
@@ -161,22 +165,27 @@ watch([filteredSpecies, query], () => {
         <Column
           field="family"
           header="Family"
+          style="width: 170px"
         />
         <Column
           field="genus"
           header="Genus"
+          style="width: 150px"
         />
         <Column
           field="order"
           header="Order"
+          style="width: 170px"
         />
         <Column
           field="class"
           header="Class"
+          style="width: 160px"
         />
         <Column
           field="taxonomicStatus"
           header="Status"
+          style="width: 150px"
         />
         <template #expansion="{ data }">
           <div class="px-4 py-2">
@@ -200,42 +209,3 @@ watch([filteredSpecies, query], () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.benchmark-primevue-table :deep(.p-datatable-table-container) {
-    position: relative;
-    isolation: isolate;
-}
-
-.benchmark-primevue-table :deep(.p-datatable-table) {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.benchmark-primevue-table :deep(.p-datatable-thead > tr > th) {
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: var(--color-sand-50);
-    border-bottom: 1px solid var(--color-surface-dark);
-}
-
-.benchmark-primevue-table :deep(.p-datatable-tbody > tr > td) {
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid rgb(214 221 207 / 50%);
-}
-
-.benchmark-primevue-table :deep(.p-virtualscroller-content) {
-    position: relative;
-    z-index: 0;
-}
-
-:deep(mark) {
-    background: oklch(94% 0.12 100);
-    border-radius: 2px;
-    padding: 0 1px;
-}
-</style>

@@ -1,5 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+/* PrimeVue (Aura, styled) injects into the `primevue` layer; declaring it
+   before Tailwind's components/utilities lets utility classes win. Matches
+   the cssLayer config in main.ts. */
+@layer theme, base, primevue, components, utilities;
+
 @import "tailwindcss";
+@plugin "tailwindcss-primeui";
 
 @theme {
     --font-sans: "Inter", "Segoe UI", sans-serif;
@@ -13,6 +20,16 @@
     --color-surface-dark: #d6ddcf;
     --color-text: #182126;
     --color-text-muted: #5f6b70;
+}
+
+/* Benchmark DataTable: match the raw-Tailwind tables (basic/tanstack) — keep body
+   cells single-line and truncated so styled PrimeVue rows hold the fixed 40px
+   virtual-scroll height instead of wrapping. The expansion row is excluded so its
+   vernacular list can still wrap. Unlayered, so it wins over the primevue layer. */
+.p-datatable-tbody > tr:not(.p-datatable-row-expansion) > td {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 :root {

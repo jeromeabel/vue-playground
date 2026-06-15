@@ -64,7 +64,10 @@ function matchedVernaculars(s: BenchmarkedSpecies) {
 function highlight(text: string): string {
     if (!query.value) return text;
     const q = query.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return text.replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+    return text.replace(
+        new RegExp(`(${q})`, "gi"),
+        "<mark class=\"rounded-[2px] bg-[oklch(94%_0.12_100)] px-px\">$1</mark>",
+    );
 }
 </script>
 
@@ -101,30 +104,39 @@ function highlight(text: string): string {
 
     <div
       ref="tableContainer"
-      class="relative isolate max-h-[600px] overflow-auto rounded border border-surface-dark"
+      class="relative isolate h-150 overflow-auto rounded border border-surface-dark"
     >
-      <table class="w-full text-left text-sm">
+      <table class="w-full table-fixed text-left text-sm">
+        <colgroup>
+          <col style="width: 72px">
+          <col>
+          <col style="width: 170px">
+          <col style="width: 150px">
+          <col style="width: 170px">
+          <col style="width: 160px">
+          <col style="width: 150px">
+        </colgroup>
         <thead class="sticky top-0 z-20 bg-sand-50">
           <tr class="border-b border-surface-dark">
-            <th class="px-3 py-2">
+            <th class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold">
               ID
             </th>
-            <th class="px-3 py-2">
+            <th class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold">
               Scientific Name
             </th>
-            <th class="px-3 py-2">
+            <th class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold">
               Family
             </th>
-            <th class="px-3 py-2">
+            <th class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold">
               Genus
             </th>
-            <th class="px-3 py-2">
+            <th class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold">
               Order
             </th>
-            <th class="px-3 py-2">
+            <th class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold">
               Class
             </th>
-            <th class="px-3 py-2">
+            <th class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 font-semibold">
               Status
             </th>
           </tr>
@@ -135,28 +147,28 @@ function highlight(text: string): string {
             :key="s.key"
           >
             <tr class="border-b border-surface-dark/50">
-              <td class="px-3 py-2 font-mono text-text-muted">
+              <td class="overflow-hidden text-ellipsis px-3 py-2 font-mono text-text-muted">
                 {{ s.benchmarkOrder }}
               </td>
               <td
-                class="px-3 py-2 italic"
+                class="overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2 italic"
                 v-html="highlight(s.canonicalName)"
               />
               <td
-                class="px-3 py-2"
+                class="overflow-hidden text-ellipsis px-3 py-2"
                 v-html="highlight(s.family)"
               />
               <td
-                class="px-3 py-2"
+                class="overflow-hidden text-ellipsis px-3 py-2"
                 v-html="highlight(s.genus)"
               />
-              <td class="px-3 py-2">
+              <td class="overflow-hidden text-ellipsis px-3 py-2">
                 {{ s.order }}
               </td>
-              <td class="px-3 py-2">
+              <td class="overflow-hidden text-ellipsis px-3 py-2">
                 {{ s.class }}
               </td>
-              <td class="px-3 py-2">
+              <td class="overflow-hidden text-ellipsis px-3 py-2">
                 {{ s.taxonomicStatus }}
               </td>
             </tr>
@@ -179,11 +191,3 @@ function highlight(text: string): string {
     </div>
   </div>
 </template>
-
-<style scoped>
-:deep(mark) {
-  background: oklch(94% 0.12 100);
-  border-radius: 2px;
-  padding: 0 1px;
-}
-</style>

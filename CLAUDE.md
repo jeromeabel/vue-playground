@@ -19,7 +19,7 @@ Botanical data explorer built with Vue 3, showcasing performance patterns for bl
 - `pnpm test` - run tests in watch mode
 - `pnpm test:run` - run tests once
 - `pnpm lint` / `pnpm lint:fix` - lint / auto-fix
-- `pnpm fetch-data` - regenerate `public/data/species-3000.json` from GBIF
+- `pnpm fetch-data` - regenerate `public/data/species-10000.json` from GBIF
 
 ## Architecture
 

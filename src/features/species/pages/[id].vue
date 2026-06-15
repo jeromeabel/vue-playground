@@ -7,7 +7,7 @@ import { useSpeciesMedia } from "../composables/use-species-media";
 import { useVernacularNames } from "../composables/use-vernacular-names";
 import SpeciesDetailSkeleton from "../components/species-detail-skeleton.vue";
 
-const route = useRoute();
+const route = useRoute("/species/[id]");
 const id = computed(() => Number(route.params.id));
 
 const { data: species, isPending, isError, error, refetch } = useSpeciesDetail(id);

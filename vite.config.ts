@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from "node:url";
 import vue from "@vitejs/plugin-vue";
 import tailwindcss from "@tailwindcss/vite";
-import VueRouter from "unplugin-vue-router/vite";
+import VueRouter from "vue-router/vite";
 import { defineConfig } from "vitest/config";
 
 // https://vite.dev/config/
@@ -13,7 +13,7 @@ export default defineConfig({
                 { src: "src/features/benchmark/pages", path: "benchmark/" },
                 "src/pages",
             ],
-            dts: "./typed-router.d.ts",
+            dts: "./src/route-map.d.ts",
             extensions: [".vue"],
             importMode: "async",
         }),

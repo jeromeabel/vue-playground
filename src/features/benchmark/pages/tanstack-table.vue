@@ -141,6 +141,25 @@ const rowByKey = computed(() => {
     return map;
 });
 
+function highlight(text: string): string {
+    if (!query.value) return text;
+    const q = query.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return text.replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+}
+
+function escapeHtml(text: string): string {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+const HIGHLIGHT_COLUMNS = new Set(["canonicalName", "family", "genus"]);
+
+// Render cell content as innerHTML on the existing <td> (no wrapper element, so the
+// measured node count is unchanged). Searchable columns get <mark>; the rest stay plain.
+function cellHtml(columnId: string, value: unknown): string {
+    const text = String(value ?? "");
+    return HIGHLIGHT_COLUMNS.has(columnId) ? highlight(text) : escapeHtml(text);
+}
+
 onBeforeMount(() => {
     markBeforeMount();
 });
@@ -256,12 +275,8 @@ onMounted(async () => {
                   :style="cell.column.id !== GROW_COLUMN
                     ? { flex: 'none', width: `${cell.column.getSize()}px`, minWidth: `${cell.column.getSize()}px` }
                     : { flex: '1', minWidth: '0' }"
-                >
-                  <FlexRender
-                    :render="cell.column.columnDef.cell"
-                    :props="cell.getContext()"
-                  />
-                </td>
+                  v-html="cellHtml(cell.column.id, cell.getValue())"
+                />
               </template>
               <template v-else-if="flattenedRows[virtualRow.index]?.type === 'vernacular'">
                 <td
@@ -269,7 +284,7 @@ onMounted(async () => {
                   class="px-8 py-1 text-sm text-text-muted"
                   style="flex: 1; min-width: 0;"
                 >
-                  {{ (flattenedRows[virtualRow.index] as VernacularRow).data.vernacularName }}
+                  <span v-html="highlight((flattenedRows[virtualRow.index] as VernacularRow).data.vernacularName)" />
                   <span class="ml-1 text-xs opacity-60">
                     ({{ (flattenedRows[virtualRow.index] as VernacularRow).data.language }})
                   </span>
@@ -282,3 +297,11 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(mark) {
+  background: oklch(94% 0.12 100);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+</style>

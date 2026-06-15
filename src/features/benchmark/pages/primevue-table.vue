@@ -65,6 +65,12 @@ function matchedVernaculars(s: BenchmarkedSpecies) {
     return s.vernacularNames.filter(v => v.vernacularName.toLowerCase().includes(q));
 }
 
+function highlight(text: string): string {
+    if (!query.value) return text;
+    const q = query.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return text.replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+}
+
 // Auto-expand rows whose vernacular names match the search
 watch([filteredSpecies, query], () => {
     if (!query.value) {
@@ -146,7 +152,10 @@ watch([filteredSpecies, query], () => {
           header="Scientific Name"
         >
           <template #body="slotProps">
-            <span class="italic">{{ slotProps.data.canonicalName }}</span>
+            <span
+              class="italic"
+              v-html="highlight(slotProps.data.canonicalName)"
+            />
           </template>
         </Column>
         <Column
@@ -176,7 +185,7 @@ watch([filteredSpecies, query], () => {
               :key="v.vernacularName"
               class="text-sm text-text-muted"
             >
-              {{ v.vernacularName }}
+              <span v-html="highlight(v.vernacularName)" />
               <span class="ml-1 text-xs opacity-60">({{ v.language }})</span>
             </div>
             <div
@@ -222,5 +231,11 @@ watch([filteredSpecies, query], () => {
 .benchmark-primevue-table :deep(.p-virtualscroller-content) {
     position: relative;
     z-index: 0;
+}
+
+:deep(mark) {
+    background: oklch(94% 0.12 100);
+    border-radius: 2px;
+    padding: 0 1px;
 }
 </style>
